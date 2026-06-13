@@ -1,0 +1,183 @@
+{
+  "metadata": {
+    "created": "2026-03-28",
+    "corpus": ["msft_10k.txt", "nvda_10k.txt", "jpm_10k.txt"],
+    "embedding_model": "text-embedding-3-small",
+    "chunk_size": 512,
+    "chunk_overlap": 50,
+    "total_questions": 20,
+    "categories": {
+      "factual": 5,
+      "reasoning": 5,
+      "comparison": 5,
+      "adversarial": 5
+    }
+  },
+  "questions": [
+    {
+      "id": "F001",
+      "category": "factual",
+      "question": "What specific types of cyberattacks does Microsoft mention in its 10-K risk factors?",
+      "reference_answer": "Microsoft mentions ransomware attacks by organized criminal threat actors and nation-states. The filing also references malware, social-engineering attacks, and denial-of-service attacks as cybersecurity risks.",
+      "source_file": "msft_10k.txt",
+      "notes": "Answer is explicitly stated in the cybersecurity risk section"
+    },
+    {
+      "id": "F002",
+      "category": "factual",
+      "question": "What manufacturing risks does Nvidia identify related to its supply chain?",
+      "reference_answer": "Nvidia identifies risks including long manufacturing lead times, dependence on third-party suppliers for fabrication, assembly, testing, and packaging, limited control over product quality and delivery schedules, potential supply-demand mismatches due to inaccurate forecasting, and vulnerability from Asia-based assembly operations subject to geopolitical and logistical disruptions.",
+      "source_file": "nvda_10k.txt",
+      "notes": "Answer is grounded in Nvidia's supply chain risk section; key detail is third-party manufacturing dependency"
+    },
+    {
+      "id": "F003",
+      "category": "factual",
+      "question": "What does JPMorgan Chase disclose about the risks of its resolution planning obligations?",
+      "reference_answer": "JPMorgan discloses that it must maintain detailed resolution plans for a rapid and orderly bankruptcy without government support. These requirements may change over time and could result in restrictions on growth, changes to business activities, requirements to restructure legal entities, or forced asset divestitures at disadvantageous times.",
+      "source_file": "jpm_10k.txt",
+      "notes": "Explicitly described in JPM's regulatory risk section on resolution planning"
+    },
+    {
+      "id": "F004",
+      "category": "factual",
+      "question": "What IRS tax dispute does Microsoft disclose in its 10-K, and what is the amount at stake?",
+      "reference_answer": "Microsoft discloses an IRS dispute over intercompany transfer pricing for tax years 2004 through 2013. The IRS is seeking approximately $28.9 billion plus penalties and interest.",
+      "source_file": "msft_10k.txt",
+      "notes": "Specific dollar figure is stated in the financial/legal risk section"
+    },
+    {
+      "id": "F005",
+      "category": "factual",
+      "question": "What specific cybersecurity incident does Microsoft disclose having experienced, and how was it reported?",
+      "reference_answer": "Microsoft discloses a late November 2023 incident in which a nation-state threat actor used a password spray attack to compromise a legacy test account and gain access to Microsoft corporate email accounts and source code repositories. The incident was disclosed in a Form 8-K filed January 19, 2024, which was subsequently amended on March 8, 2024.",
+      "source_file": "msft_10k.txt",
+      "notes": "Specific dates and filing details are explicitly stated; tests retrieval of a concrete incident rather than general risk language"
+    },
+    {
+      "id": "R001",
+      "category": "reasoning",
+      "question": "Based on the risk factors, which company appears most exposed to geopolitical risk, and what specific evidence supports that conclusion?",
+      "reference_answer": "Nvidia appears most exposed due to its explicit dependence on Taiwan-based manufacturing (TSMC) and detailed discussion of US-China export restrictions affecting its chip sales.",
+      "source_file": "nvda_10k.txt",
+      "notes": "Requires inference — answer not stated directly, must be derived"
+    },
+    {
+      "id": "R002",
+      "category": "reasoning",
+      "question": "Which company's 10-K suggests the greatest operational dependency on third parties, and what evidence supports this?",
+      "reference_answer": "JPMorgan Chase shows the greatest operational dependency on third parties. Its filing details risks from custodians, technology vendors, cloud providers, clearing systems, and central counterparties (CCPs), including specific failure scenarios such as data processing degradation, service interruptions, settlement failures, and mandatory loss-sharing from CCP defaults — more granular and consequential than the third-party risks described by Microsoft or Nvidia.",
+      "source_file": "jpm_10k.txt",
+      "notes": "Requires synthesis across all three filings — JPM's third-party risk section is uniquely detailed with named failure modes and financial consequences"
+    },
+    {
+      "id": "R003",
+      "category": "reasoning",
+      "question": "What does Microsoft's disclosure of the November 2023 nation-state attack imply about the risk of maintaining legacy systems in large enterprise environments?",
+      "reference_answer": "The disclosure implies that a single legacy or unpatched account can serve as an entry point for sophisticated attackers, even at a company with mature security practices. Microsoft's own compromise via a legacy test account illustrates that legacy system hygiene is a systemic risk, not just theoretical — particularly for companies managing large-scale cloud infrastructure and software products relied upon by millions of customers.",
+      "source_file": "msft_10k.txt",
+      "notes": "Requires inference — the implication about legacy system risk must be derived from the incident details, not read directly"
+    },
+    {
+      "id": "R004",
+      "category": "reasoning",
+      "question": "Based on the risk factors, which company faces the most complex regulatory environment, and why?",
+      "reference_answer": "JPMorgan Chase faces the most complex regulatory environment. Its filing discloses overlapping requirements across capital adequacy (CCAR, Basel rules), resolution planning, anti-money laundering, consumer protection, antitrust, and international financial regulation — all of which directly constrain its business activities, pricing, capital distribution, and even its ability to pay dividends. The breadth and consequence of these constraints exceed what Microsoft or Nvidia describe.",
+      "source_file": "jpm_10k.txt",
+      "notes": "Requires cross-document inference — must assess regulatory complexity relative to the other two companies"
+    },
+    {
+      "id": "R005",
+      "category": "reasoning",
+      "question": "What does Nvidia's reliance on Asia-based manufacturing suggest about its comparative vulnerability to physical supply chain disruption versus Microsoft and JPMorgan?",
+      "reference_answer": "Nvidia's concentration of fabrication and assembly in Asia — particularly reliance on third-party manufacturers in Taiwan — makes it uniquely vulnerable to physical supply chain disruption. Unlike Microsoft, which distributes risk across globally distributed cloud infrastructure and software, or JPMorgan, whose core risks are financial and regulatory, Nvidia's production cannot be quickly relocated. A geopolitical event such as US-China conflict or a Taiwan strait crisis would be an operational existential risk for Nvidia in a way it would not be for the other two companies.",
+      "source_file": "nvda_10k.txt",
+      "notes": "Requires synthesis across all three filings — the contrast between hardware-physical and software-financial risk chains must be inferred"
+    },
+    {
+      "id": "C001",
+      "category": "comparison",
+      "question": "How do Microsoft and JPMorgan Chase differ in how they describe cybersecurity risk?",
+      "reference_answer": "Microsoft focuses on product-level vulnerabilities and risk to its software customer base at scale. JPMorgan focuses on financial system integrity — unauthorized account access, wire fraud, and systemic interconnection risk in the financial sector.",
+      "source_file": "msft_10k.txt, jpm_10k.txt",
+      "notes": "Must draw on both documents — single-source answer is insufficient"
+    },
+    {
+      "id": "C002",
+      "category": "comparison",
+      "question": "How do Microsoft and Nvidia differ in how they describe their exposure to supply chain risk?",
+      "reference_answer": "Microsoft describes supply chain risk primarily around component shortages for devices and datacenters, competition for GPU availability, and energy supply constraints for AI infrastructure expansion — risks that are significant but secondary to its core software business. Nvidia's supply chain risk is more foundational: it depends entirely on third-party manufacturers for chip fabrication, assembly, and testing, with long lead times and limited control over quality and yield. For Nvidia, supply chain failure is a direct threat to revenue; for Microsoft, it is more of an infrastructure scaling constraint.",
+      "source_file": "msft_10k.txt, nvda_10k.txt",
+      "notes": "Must draw on both documents — single-source answer is insufficient"
+    },
+    {
+      "id": "C003",
+      "category": "comparison",
+      "question": "How do all three companies — Microsoft, Nvidia, and JPMorgan — describe the risk posed by artificial intelligence or emerging technology?",
+      "reference_answer": "Microsoft has the most extensive AI risk disclosure, covering algorithmic flaws, biased training data, harmful or inaccurate AI-generated content, intellectual property claims from AI training, data privacy concerns, and regulatory risk from the EU AI Act. Nvidia treats AI primarily as a demand and supply risk — GPU shortages and failure to meet evolving industry needs — with limited discussion of AI governance. JPMorgan addresses AI and emerging technology primarily through operational and cyber risk lenses, focusing on system failures and fraud rather than AI-specific ethical or regulatory concerns.",
+      "source_file": "msft_10k.txt, nvda_10k.txt, jpm_10k.txt",
+      "notes": "Must draw on all three documents — tests whether the system can synthesize across the full corpus"
+    },
+    {
+      "id": "C004",
+      "category": "comparison",
+      "question": "How do Microsoft and JPMorgan Chase differ in how they frame geopolitical risk?",
+      "reference_answer": "Microsoft frames geopolitical risk around trade restrictions, export controls, and conflict-driven supply chain disruptions — specifically citing the Ukraine conflict, the Israel-Hamas conflict, and U.S. AI export regulations such as the AI Diffusion Rule — with a focus on hardware availability and data localization requirements. JPMorgan frames geopolitical risk more broadly through macroeconomic transmission channels: monetary policy responses, sanctions, currency fluctuations, credit contraction, and market volatility. This reflects JPMorgan's exposure as a global financial intermediary rather than a product or infrastructure company.",
+      "source_file": "msft_10k.txt, jpm_10k.txt",
+      "notes": "Must draw on both documents — answer should highlight the product-company vs. financial-institution framing difference"
+    },
+    {
+      "id": "C005",
+      "category": "comparison",
+      "question": "How do Nvidia and JPMorgan Chase each describe concentration risk, and what are the potential consequences in each case?",
+      "reference_answer": "Nvidia describes concentration risk as dependence on a small number of third-party manufacturers, primarily in Asia, for chip fabrication and assembly. The consequences include product shortages, quality failures, and inability to fulfill customer demand. JPMorgan describes concentration risk as correlated credit exposures across counterparties in the same sector, geography, or business type, with consequences including contagion-style credit deterioration, reduced market liquidity, and broader systemic stress. The nature of concentration risk is fundamentally different: physical supply concentration for Nvidia versus financial counterparty concentration for JPMorgan.",
+      "source_file": "nvda_10k.txt, jpm_10k.txt",
+      "notes": "Must draw on both documents — tests ability to identify structural parallels across different industries"
+    },
+    {
+      "id": "A001",
+      "category": "adversarial",
+      "question": "What was Microsoft's total revenue in the most recent fiscal year?",
+      "reference_answer": "NOT IN DOCUMENTS",
+      "expected_behavior": "System should state that revenue figures are not present in the provided risk factors sections.",
+      "source_file": "none",
+      "notes": "Tests hallucination — financial results not in risk factors section"
+    },
+    {
+      "id": "A002",
+      "category": "adversarial",
+      "question": "How many employees does Nvidia have?",
+      "reference_answer": "NOT IN DOCUMENTS",
+      "expected_behavior": "System should state employee count is not in the provided documents.",
+      "source_file": "none",
+      "notes": ""
+    },
+    {
+      "id": "A003",
+      "category": "adversarial",
+      "question": "What is JPMorgan Chase's current dividend yield?",
+      "reference_answer": "NOT IN DOCUMENTS",
+      "expected_behavior": "System should state dividend information is not covered in the risk factors.",
+      "source_file": "none",
+      "notes": ""
+    },
+    {
+      "id": "A004",
+      "category": "adversarial",
+      "question": "Who is the current CEO of Nvidia?",
+      "reference_answer": "NOT IN DOCUMENTS",
+      "expected_behavior": "System should state executive information is not in the provided sections.",
+      "source_file": "none",
+      "notes": ""
+    },
+    {
+      "id": "A005",
+      "category": "adversarial",
+      "question": "What was Nvidia's GPU market share in the data center segment last year?",
+      "reference_answer": "NOT IN DOCUMENTS",
+      "expected_behavior": "System should state market share data is not available in the provided documents.",
+      "source_file": "none",
+      "notes": ""
+    }
+  ]
+}
