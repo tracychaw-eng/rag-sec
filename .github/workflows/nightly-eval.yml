@@ -23,8 +23,11 @@ jobs:
         run: python edgar_downloader.py
       - name: Ingest (parse, chunk, embed, index)
         run: python -m sec_rag.ingestion.pipeline
-      - name: Full eval + RAGAS
-        run: python -m eval.run_secrag --label nightly
+      # dev split only: thresholds are tuned on dev. The holdout split is
+      # reserved for release evaluation (run manually:
+      # python -m eval.run_secrag --label release-X --split holdout).
+      - name: Full eval + RAGAS (dev split)
+        run: python -m eval.run_secrag --label nightly --split dev
       - name: Threshold gate
         run: python -m eval.check_thresholds --label nightly
       - name: Upload eval report

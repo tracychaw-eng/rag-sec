@@ -93,3 +93,55 @@ Builds on Phases 1–2 (`docs/phase1.md`, `docs/phase2.md`).
   despite 2x distractors. F006/F007 numeric: faithfulness 1.0,
   recall 1.0. Threshold gate: PASSED. Abstention: 5/5.
 - 57 unit tests, ruff clean.
+
+## Dataset v4 — growth + held-out slice (2026-07-09)
+
+Closes the evaluation-strategy commitment from the architecture review:
+grow the dataset, add multi-year/numeric/multi-hop questions, keep a
+held-out slice, version everything.
+
+- **90 questions** (was 22): +63 corpus-grounded generated questions
+  (18 numeric, 16 multi-year, 14 cross-company multi-hop, 12 factual,
+  10 reasoning → 63 after a manual quality filter dropped trivia and
+  questions that failed to name their company) + 5 new adversarial.
+- **Generation pipeline** (`eval/generate_questions.py`): an LLM authors
+  each question FROM actual parent chunks, and candidates pass three
+  programmatic gates — key facts verbatim in the source chunk, no
+  invented figures (numeric), and retrieval answerability (source
+  ticker/filing surfaces in top candidates). 18 candidates were rejected
+  by these gates. Bias note: the answerability gate filters toward what
+  our retriever can find — fine for a regression suite, not for a
+  research benchmark.
+- **Held-out slice**: 19 questions (stratified across new types) marked
+  `split: holdout` — never used for tuning, prompt iteration, or
+  threshold setting. All 22 legacy questions are `dev` by definition:
+  they are contaminated (the reranker floor, F003 prompt, and routing
+  were all tuned against them).
+- **Enforcement**: nightly workflow runs `--split dev`; thresholds apply
+  to dev; the harness reports dev vs holdout side by side whenever both
+  are present; holdout runs are for release evaluation only.
+- **Versioning**: dataset `version: 4` + `splits` + `holdout_policy` in
+  metadata, alongside `PROMPT_VERSION` (generation prompts) and the
+  versioned Qdrant collection name (index schema/embedding model).
+
+### First split-aware run (secrag-v5, all 90 questions)
+
+| | dev (n=71, tuned on) | holdout (n=19, never tuned on) |
+| --- | --- | --- |
+| faithfulness | 0.891 | 0.889 |
+| answer_relevancy | 0.801 | 0.953 |
+| context_recall | 0.880 | 0.958 |
+| context_precision | 0.804 | 0.859 |
+| source_recall@K | 0.836 | 0.842 |
+
+**No generalization gap** — holdout matches or beats dev, so the tuning
+done in Phases 1–3 didn't overfit the original 22 questions. The harder
+90-question set also surfaces honest headroom the old set couldn't:
+overall source recall is 0.838 (was a saturated 1.0), multi-year
+questions show context-precision noise (both years retrieved when the
+judge credits one), and one holdout reasoning question (R102) exposed
+speculative inference (faithfulness 0.231). Abstention 9/10.
+
+Thresholds were recalibrated to dataset v4's dev measurements
+(`eval/thresholds.json` carries `dataset_version` — floors are
+meaningless across dataset versions). Gate passes on secrag-v5.

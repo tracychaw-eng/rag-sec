@@ -36,10 +36,17 @@ def main():
     ap.add_argument("--no-ragas", action="store_true")
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--label", default="secrag-v1")
+    ap.add_argument("--split", choices=["dev", "holdout", "all"],
+                    default="all",
+                    help="holdout is for release evaluation only — never "
+                         "tune against it")
     args = ap.parse_args()
 
     dataset = json.loads(Path("evaluation_dataset.json").read_text(encoding="utf-8"))
     questions = dataset["questions"]
+    if args.split != "all":
+        questions = [q for q in questions
+                     if q.get("split", "dev") == args.split]
     if args.only:
         questions = [q for q in questions if q["id"] in set(args.only)]
 
@@ -60,6 +67,8 @@ def main():
         results.append({
             "id": item["id"],
             "category": item["category"],
+            "split": item.get("split", "dev"),
+            "tags": item.get("tags", []),
             "question": item["question"],
             "reference_answer": item["reference_answer"],
             "system_answer": ans.text,

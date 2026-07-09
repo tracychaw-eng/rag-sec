@@ -1,0 +1,851 @@
+[
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the total amount of mortgage-backed securities reported by JPMorgan Chase & Co. as of December 31, 2025?",
+    "reference_answer": "103,108",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it15_p108"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the amount of investment securities losses reported by JPMorgan Chase & Co. for the year ending December 31, 2025?",
+    "reference_answer": "(58)",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it15_p025"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the total operating income for NVIDIA for the year ended January 25, 2026?",
+    "reference_answer": "139,297",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it7_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the total stockholders’ equity for Microsoft Corporation as of June 30, 2025?",
+    "reference_answer": "$ 343,479",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it8_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What were the total investment banking fees for JPMorgan Chase & Co. for the year ended December 31, 2024?",
+    "reference_answer": "$9,116 million",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p020"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the net income for JPMorgan Chase & Co. for the year ended December 31, 2024?",
+    "reference_answer": "17,603",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p157"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the total assets measured at fair value for JPMorgan Chase & Co. as of December 31, 2024?",
+    "reference_answer": "$1,482,402",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p065"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the total investment securities, net of allowance for credit losses, for JPMorgan Chase & Co. as of December 31, 2024?",
+    "reference_answer": "685,513",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p109"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the Noninterest revenue – reported figure for JPMorgan Chase & Co. for the year ended December 31, 2024?",
+    "reference_answer": "$84,973",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p013"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the carrying value of wholesale lending-related commitments for JPMorgan Chase & Co. as of December 31, 2024?",
+    "reference_answer": "$2.7 billion",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p090"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the amount of eligible high-quality liquid assets (HQLA) that JPMorgan Chase Bank, N.A. must maintain to meet its estimated total net cash outflows over a 30 calendar-day period of significant stress?",
+    "reference_answer": "sufficient to meet their respective estimated total net cash outflows over a prospective 30 calendar-day period of significant stress",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it15_p035"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the aggregate fair value of net derivative payables for JPMorgan Chase & Co. as of December 31, 2024?",
+    "reference_answer": "15,371",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p098"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the amount of deposits that JPMorgan Chase & Co. holds at any given time, as influenced by Federal Reserve actions and broader monetary conditions?",
+    "reference_answer": "The amount of deposits that the Firm holds at any given time may be influenced by Federal Reserve actions, as well as broader monetary conditions and competition for deposits.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p057"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the total long-term portion of NVIDIA Corporation's debt as of January 26, 2025?",
+    "reference_answer": "8,463",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2025-02-26_it15_p011"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the amount disclosed in the Exchange & clearing house guarantees and commitments line for JPMorgan Chase & Co.?",
+    "reference_answer": "The amount is disclosed in the table on page 303.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p152"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What was the total long-term debt reported by JPMorgan Chase & Co. as of December 31, 2024?",
+    "reference_answer": "34,564",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it15_p083"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "numeric"
+    ],
+    "question": "What is the total assets measured at fair value on a recurring basis for JPM as reported in the 10-K?",
+    "reference_answer": "$1,479,913",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it15_p078"
+    ],
+    "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the employee count and composition of JPMorgan Chase change from the 2025 10-K filing to the 2026 10-K filing?",
+    "reference_answer": "In the 2025 10-K filing, JPMorgan Chase had not yet disclosed the employee count for December 31, 2025, but the 2026 10-K filing states that as of December 31, 2025, the Firm had 318,512 employees globally. The 2026 filing provides detailed racial and gender composition statistics for its employees, which were not present in the 2025 filing.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1_p004",
+      "JPM_2025-02-14_it1_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the executive officer positions and their descriptions change between NVIDIA's 10-K filings for the fiscal years ending 2025 and 2026?",
+    "reference_answer": "In the 2025 filing, NVIDIA listed five executive officers along with detailed descriptions of their backgrounds and positions. In the 2026 filing, while the specific positions of the executive officers are not detailed, it still mentions the presence of executive officers but lacks the same level of detail regarding their backgrounds and career histories as provided in the 2025 filing.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p006",
+      "NVDA_2025-02-26_it1_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the total fair value of trading assets – debt and equity instruments change from the fiscal year ended December 31, 2023 to the fiscal year ended December 31, 2024 for JPMorgan Chase & Co.?",
+    "reference_answer": "In the 2023 filing, the total trading assets – debt and equity instruments were reported as $2,909 million. In the 2024 filing, this figure changed to $2,373 million, indicating a decrease of $536 million.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it15_p084",
+      "JPM_2025-02-14_it15_p150"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the disclosures regarding regulatory challenges and their potential impact on JPMorgan Chase's business operations change between the 2025 and 2026 10-K filings?",
+    "reference_answer": "In the 2025 filing, JPMorgan Chase discusses the challenges posed by increased regulation in the financial services industry, specifically mentioning limitations on fees and the potential need to limit product offerings or incur restructuring costs. In contrast, the 2026 filing emphasizes broader risks related to regulatory compliance, including the impact of regulatory capital requirements and the potential for increased funding costs due to credit rating downgrades, highlighting a more comprehensive view of liquidity and capital management challenges.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p006",
+      "JPM_2025-02-14_it1A_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the leadership structure of Microsoft change between the 2024 and 2025 10-K filings?",
+    "reference_answer": "In the 2024 filing, the executive officers listed did not include Amy L. Coleman or Kathleen T. Hogan in their current roles, as they were appointed to their positions in March 2025. The 2025 filing reflects these changes, noting that Coleman became Executive Vice President and Chief Human Resources Officer and Hogan became Executive Vice President, Office of Strategy and Transformation in 2025.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1_p005",
+      "MSFT_2024-07-30_it1_p005"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the disclosures regarding legal contingencies and income taxes change between Microsoft's 10-K filings for the fiscal years 2024 and 2025?",
+    "reference_answer": "In the 2024 filing, the disclosure about legal contingencies states that an estimated loss from a loss contingency is accrued if it is probable that an asset has been impaired or a liability incurred, similar to the 2025 filing. However, both years emphasize that changes in the factors determining these estimations could materially impact consolidated financial statements. Regarding income taxes, both years maintain that the objectives are to recognize taxes payable or refundable and deferred tax liabilities and assets, but the 2025 filing reiterates the importance of judgment in assessing future tax consequences, which is also present in the 2024 filing but with less emphasis on the variability of outcomes.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it7_p006",
+      "MSFT_2024-07-30_it7_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How has NVIDIA's focus on AI and accelerated computing offerings evolved between the 2025 and 2026 10-K filings?",
+    "reference_answer": "In the 2025 filing, NVIDIA describes itself as a full-stack computing infrastructure company with a focus on data-center-scale offerings that support various industries, emphasizing the CUDA programming model and the development of AI applications. In the 2026 filing, NVIDIA continues to promote its platforms and mentions the development of AI frameworks, SDKs, and APIs, highlighting its Deep Learning Institute for training developers and expanding its supplier relationships for manufacturing. The 2026 filing also reflects a commitment to building redundancy and resilience in operations, indicating a strategic evolution in response to growing customer demand.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p003",
+      "NVDA_2025-02-26_it1_p000"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the notional amounts of foreign exchange contracts purchased that are not designated as hedging instruments change between Microsoft's 10-K filings for the fiscal years ending June 30, 2024, and June 30, 2023?",
+    "reference_answer": "In the 2024 filing, the notional amount of foreign exchange contracts purchased that are not designated as hedging instruments was $7,167 million, while in the 2023 filing, it was $7,874 million. This indicates a decrease of $707 million in the notional amounts of these contracts.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it8_p017",
+      "MSFT_2024-07-30_it8_p008"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did NVIDIA's disclosures regarding data privacy laws and their potential impact on business operations change between the 2025 and 2026 10-K filings?",
+    "reference_answer": "In the 2025 10-K filing, there was no mention of the California Consumer Privacy Act (CCPA) or specific data privacy laws impacting business operations. However, in the 2026 10-K filing, NVIDIA explicitly discusses the CCPA, stating that it gives California residents rights regarding their personal information and outlines potential fines for noncompliance. The 2026 filing also mentions the European Union's General Data Protection Regulation (GDPR) and the implications of various state and federal data privacy laws, indicating a heightened focus on the regulatory landscape compared to the previous year.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1A_p012",
+      "NVDA_2025-02-26_it1A_p003"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did NVIDIA's concentration of revenue from direct customers change between fiscal years 2025 and 2026?",
+    "reference_answer": "In fiscal year 2026, sales to one direct customer represented 22% of total revenue and sales to another direct customer represented 14% of total revenue. In contrast, for fiscal year 2025, sales to one direct customer represented 12% of total revenue and sales to two direct customers each represented 11% of total revenue.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it7_p002",
+      "NVDA_2025-02-26_it7_p003"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the disclosures regarding climate change risks evolve between JPMorgan Chase's 10-K filings for the years 2025 and 2026?",
+    "reference_answer": "In the 2025 filing, JPMorgan Chase discusses the adverse effects of climate change on its business and operations, mentioning both physical risks (like severe weather events) and transition risks (such as changes in public policy towards a lower-carbon economy). In contrast, the 2026 filing expands on these risks, emphasizing the potential reputational harm and the effects of climate change on the financial condition of its clients and customers, while also highlighting the increased uncertainty in climate risk assessments due to limited historical data.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p009",
+      "JPM_2025-02-14_it1A_p013"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did the regulatory environment regarding the FDIC deposit insurance fund and its reserve ratio change between JPMorgan Chase's 10-K filings for the years 2025 and 2026?",
+    "reference_answer": "In the 2025 filing, it was stated that the FDIC was required to maintain a minimum reserve ratio of 1.35% and had adopted a restoration plan to achieve this by September 30, 2028. By the 2026 filing, it was noted that as of June 30, 2025, the reserve ratio exceeded the statutory minimum, and the FDIC was no longer under a restoration plan. Additionally, the designated reserve ratio for 2026 was confirmed to remain unchanged at 2%.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1_p002",
+      "JPM_2025-02-14_it1_p003"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did NVIDIA's income tax expense change from the fiscal year ending January 26, 2025, to the fiscal year ending January 25, 2026?",
+    "reference_answer": "In the 2025 filing, NVIDIA reported an income tax expense of $11,146 million, while in the 2026 filing, the income tax expense increased significantly to $21,383 million.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it15_p012",
+      "NVDA_2025-02-26_it15_p005"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did Microsoft's net recognized losses on investments change from the fiscal year 2024 to the fiscal year 2025 in their 10-K filings?",
+    "reference_answer": "In the fiscal year 2025 10-K filing, Microsoft reported net recognized losses on investments of $(349 million), which increased from $(118 million) reported in the fiscal year 2024 10-K filing.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it7_p003",
+      "MSFT_2024-07-30_it7_p003"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did NVIDIA's disclosures regarding cybersecurity risks change between the 10-K filings for the fiscal years ended 2025 and 2026?",
+    "reference_answer": "In the 2025 filing, NVIDIA discussed various cybersecurity threats including security incidents arising from employees and third-party service providers, but did not emphasize the increasing sophistication of cyber-attacks or the use of AI technology in these attacks. The 2026 filing, however, highlighted that cyber-attacks are becoming increasingly sophisticated, with specific mention of organized criminal threat actors and nation-state-supported actors using AI technology for more automated and coordinated attacks, indicating a heightened concern about the evolving nature of cybersecurity threats.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1A_p004",
+      "NVDA_2025-02-26_it1A_p012"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "multiyear"
+    ],
+    "question": "How did NVIDIA's approach to the autonomous vehicle market change between the 2025 and 2026 10-K filings?",
+    "reference_answer": "In the 2025 filing, NVIDIA described its autonomous vehicle offerings under the DRIVE Hyperion brand and emphasized its partnerships with hundreds of automotive ecosystem players, while in the 2026 filing, the company continued to highlight the DRIVE AGX computing hardware and mentioned the introduction of over-the-air updates to enhance vehicle capabilities.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p002",
+      "NVDA_2025-02-26_it1_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do Microsoft and NVIDIA address the risks associated with competition and product defects in their respective markets, and what implications do these risks have on their operational strategies?",
+    "reference_answer": "Both Microsoft and NVIDIA face significant competition in their respective markets, which impacts their operational strategies. Microsoft highlights intense competition in technology, particularly regarding platform-based ecosystems, and emphasizes the need for continuous innovation to remain competitive. They also note the challenges posed by competing platforms and the necessity to attract developers to their ecosystem. On the other hand, NVIDIA discusses the risks of product defects and the complexities of their hardware and software offerings, which can lead to significant costs and reputational damage. Both companies recognize that their ability to manage these risks is crucial for maintaining market share and financial performance. Microsoft's focus on cloud-based services and AI innovation contrasts with NVIDIA's emphasis on product reliability and defect management, reflecting their different strategic priorities in addressing competitive pressures.",
+    "source_file": "MSFT, NVDA",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1A_p000",
+      "NVDA_2026-02-25_it1A_p003"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do Microsoft and JPMorgan Chase address the risks associated with market fluctuations and economic conditions in their respective sectors, and what strategies do they employ to mitigate these risks?",
+    "reference_answer": "Microsoft emphasizes the importance of understanding user intent and adapting to changing market dynamics through continuous innovation and product development, particularly in areas like AI and cloud services. They also highlight the need for operational resilience in their datacenter operations to meet evolving customer demands. In contrast, JPMorgan Chase focuses on the impact of macroeconomic conditions on their capital markets activities and the potential for increased credit losses due to economic downturns. They outline specific risks related to interest rates and market volatility, and their strategies include maintaining liquidity and managing credit risk to safeguard against adverse economic conditions.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1_p003",
+      "JPM_2026-02-13_it1A_p004"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do NVIDIA and JPMorgan Chase address the potential impacts of regulatory compliance on their operational and financial performance, and what specific risks do they highlight in their 10-K filings?",
+    "reference_answer": "NVIDIA discusses that compliance with existing or future governmental regulations could 'further increase our costs, impact our competitive position, and otherwise may have a material adverse impact on our business, financial condition and results of operations in subsequent periods.' In contrast, JPMorgan Chase emphasizes that its liquidity and cost of funding could be adversely affected by regulatory requirements, stating that 'if JPMorganChase fails to effectively manage its liquidity, this could constrain its ability to fund or invest in its businesses and subsidiaries, and thereby adversely affect its results of operations.' Both companies highlight the significant risks posed by regulatory compliance but focus on different aspects of their operations.",
+    "source_file": "JPM, NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p005",
+      "JPM_2026-02-13_it1A_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do JPMorgan Chase and Microsoft address the challenges posed by evolving cyber threats and the interconnectedness of their systems with third-party vendors and customers, particularly in terms of vulnerability management and incident response?",
+    "reference_answer": "Both JPMorgan Chase and Microsoft recognize the increasing sophistication of cyber threats and the risks associated with their interconnected systems. JPMorgan Chase emphasizes the need for timely identification and enhancement of cybersecurity controls to protect against unauthorized access and emerging threats, highlighting the importance of oversight of third-party vendors. Similarly, Microsoft notes the challenges in detecting vulnerabilities and the potential for cascading impacts across their networks and those of their partners. Both companies acknowledge that cyber incidents can disrupt operations and require significant resources for remediation, with JPMorgan Chase specifically mentioning the need for significant investments in technology to enhance security measures, while Microsoft points to the complexities of supporting a wide range of customer systems and the necessity for ongoing updates and security practices.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p008",
+      "MSFT_2025-07-30_it1A_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do the operational risks related to workforce management and supply chain constraints differ between JPMorgan Chase and NVIDIA, and what implications do these differences have for their respective business models?",
+    "reference_answer": "JPMorgan Chase's operational risks are significantly tied to the management of its workforce, particularly in relation to third-party vendors and the potential impacts of health emergencies or staffing shortages. This reliance on human capital can lead to operational disruptions if employees fail to adhere to controls or if external factors impede their ability to work effectively. In contrast, NVIDIA faces operational risks primarily associated with supply chain constraints and the ability to accurately estimate customer demand for its semiconductor products. This includes challenges in securing sufficient manufacturing capacity and the potential for mismatches between supply and demand, which can lead to financial losses. While both companies face operational risks, JPMorgan Chase's risks are more focused on workforce and compliance issues, whereas NVIDIA's are centered around manufacturing and supply chain dynamics. These differences reflect their distinct business models: JPMorgan Chase operates in the financial services sector where human capital and compliance are critical, while NVIDIA operates in the technology sector where supply chain management and production capacity are paramount.",
+    "source_file": "JPM, NVDA",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p009",
+      "NVDA_2026-02-25_it1A_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do NVIDIA and Microsoft address the risks associated with their global operations and technological advancements in their respective 10-K filings?",
+    "reference_answer": "NVIDIA emphasizes its commitment to innovation and the importance of its technology stack in supporting various industries, which helps mitigate risks related to technological advancements. They focus on their extensive R&D investments and the integration of hardware and software to ensure resilience in their offerings. On the other hand, Microsoft highlights the risks posed by geopolitical conditions, climate change, and operational disruptions, indicating that these factors could affect their ability to conduct business and meet customer needs. Both companies recognize the importance of a robust strategy to navigate global challenges while continuing to innovate in their fields.",
+    "source_file": "MSFT, NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p000",
+      "MSFT_2025-07-30_it1A_p007"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do JPMorgan Chase's and Microsoft's disclosures regarding cybersecurity risks reflect their respective operational dependencies on third-party systems and the implications for customer trust and service continuity?",
+    "reference_answer": "Both JPMorgan Chase and Microsoft acknowledge significant cybersecurity risks that stem from their reliance on third-party systems. JPMorgan Chase emphasizes the operational risks associated with external systems, stating that disruptions in these systems could lead to 'delays or other disruptions in providing services' and 'loss of confidence in the ability of JPMorganChase, or financial institutions generally, to protect against and withstand operational disruptions.' Similarly, Microsoft notes that 'breaches of our facilities, network, or data security can disrupt the security of our systems and business applications,' which could impair their ability to provide services and protect customer data. Both companies highlight the evolving nature of cyber threats and the potential for these risks to undermine customer trust and service reliability.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p007",
+      "MSFT_2025-07-30_it1A_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do Microsoft and JPMorgan Chase address the risks associated with regulatory compliance and technological advancements in their respective industries, and what potential impacts do these risks have on their financial performance?",
+    "reference_answer": "Both Microsoft and JPMorgan Chase face significant risks related to regulatory compliance and technological advancements. Microsoft highlights the uncertainties associated with government contracts, including audits and the possibility of penalties if contractual obligations are not met, which could adversely affect its financial condition and reputation. Additionally, Microsoft is navigating the complexities of international tax laws and the protection of its intellectual property in a rapidly evolving technological landscape. On the other hand, JPMorgan Chase emphasizes the challenges posed by intense competition and the necessity to adapt to new technologies, such as generative AI and blockchain, to maintain its market position. The bank's ability to manage these risks is critical for its growth prospects and operational stability, as failure to do so could lead to decreased revenues and increased compliance costs. Ultimately, both companies recognize that their strategic responses to these risks will significantly influence their financial outcomes.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1A_p006",
+      "JPM_2026-02-13_it1A_p011"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do the regulatory challenges faced by JPMorgan Chase in the financial services industry compare to the geopolitical and operational risks that Microsoft encounters in its global business operations?",
+    "reference_answer": "JPMorgan Chase faces significant regulatory challenges due to its status as a highly-regulated financial services firm, which requires it to comply with stringent supervision and laws that could lead to operational modifications and increased costs. In contrast, Microsoft encounters geopolitical and operational risks that can disrupt its business, including changes in regulatory systems, international trade policies, and conditions that may impact its ability to operate in various markets. Both companies must navigate complex environments that can affect their financial performance, albeit through different mechanisms: JPMorgan Chase through compliance and regulatory pressures, and Microsoft through geopolitical and operational disruptions.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p001",
+      "MSFT_2025-07-30_it1A_p007"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do NVIDIA's advancements in AI technology and infrastructure compare with JPMorgan Chase's strategic approach to integrating AI in its financial services, particularly in terms of risk management and competitive positioning?",
+    "reference_answer": "NVIDIA focuses on pioneering accelerated computing and AI infrastructure, with a strong emphasis on their GPU technology and software stack to support various industries, including healthcare and automotive. Their platform strategy aims to create unique value through innovation and extensive R&D investments. In contrast, JPMorgan Chase emphasizes the need for effective management strategies to integrate new technologies, including AI, into their operations while navigating competitive pressures and regulatory challenges. Both companies recognize the importance of AI, but NVIDIA is more centered on technological advancements, while JPMorgan Chase is focused on strategic execution and risk management in a highly competitive financial landscape.",
+    "source_file": "JPM, NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p000",
+      "JPM_2026-02-13_it1A_p011"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do Microsoft and NVIDIA address the risks associated with competition and operational disruptions in their respective industries?",
+    "reference_answer": "Microsoft highlights intense competition across various markets, emphasizing the need for continuous innovation and adaptation to changing technologies and user needs. They face challenges from both large and small competitors, particularly in the cloud services and AI sectors. In contrast, NVIDIA discusses the risks of operational disruptions due to geopolitical tensions and natural disasters, which could affect their supply chain and manufacturing processes. Both companies acknowledge that external factors, such as regulatory changes and environmental conditions, could significantly impact their business operations and financial performance.",
+    "source_file": "MSFT, NVDA",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1A_p000",
+      "NVDA_2026-02-25_it1A_p005"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do Microsoft and JPMorgan Chase address the risks associated with cybersecurity threats in their respective industries, and what measures do they implement to protect their customers and operations?",
+    "reference_answer": "Microsoft emphasizes the evolving nature of cyber threats, particularly with the integration of AI and machine learning, and acknowledges the challenges in detecting and mitigating these risks. They highlight the importance of maintaining security across their products and services, particularly in cloud environments, and recognize the vulnerabilities that can arise from customer practices. On the other hand, JPMorgan Chase operates in a highly regulated financial environment and faces competition from various financial service providers. They are subject to extensive regulations that influence their cybersecurity measures. Both companies recognize the critical nature of cybersecurity in maintaining customer trust and operational integrity, with Microsoft focusing on product security and customer data protection, while JPMorgan Chase emphasizes regulatory compliance and the need to adapt to emerging threats.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1A_p002",
+      "JPM_2026-02-13_it1_p000"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do JPMorgan Chase and Microsoft address the risks associated with cybersecurity threats in their operations, particularly in relation to third-party vulnerabilities and technological advancements?",
+    "reference_answer": "JPMorgan Chase highlights the potential vulnerabilities arising from third-party relationships, emphasizing that their cybersecurity risks could be intensified by factors such as increased cyber attack volume during geopolitical tensions and technological advancements like AI and quantum computing. They express concern about the interconnectedness with third parties that may not adopt robust security measures quickly enough, increasing their exposure to data compromise. In contrast, Microsoft, while not detailing specific cybersecurity risks in the provided excerpt, underscores the importance of maintaining a robust Investor Relations website to keep stakeholders informed about their business strategies and governance, which indirectly relates to their approach to managing cybersecurity through transparency and stakeholder engagement.",
+    "source_file": "JPM, MSFT",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p008",
+      "MSFT_2025-07-30_it1_p005"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "comparison",
+    "tags": [
+      "multihop"
+    ],
+    "question": "How do JPMorgan Chase and NVIDIA address the risks associated with cybersecurity and regulatory compliance in their respective industries, and what measures do they implement to mitigate these risks?",
+    "reference_answer": "JPMorgan Chase emphasizes its compliance with various economic sanctions and anti-corruption laws, while also highlighting the regulatory oversight of its compensation practices. The firm is adapting to evolving regulatory guidelines, particularly in the EU regarding sustainability and compensation. In contrast, NVIDIA focuses on the cybersecurity threats it faces, including sophisticated cyber-attacks and the reliance on third-party suppliers for critical business systems, which exposes it to potential breaches. Both companies recognize the importance of employee training and adherence to security policies to mitigate risks, but they operate in different regulatory environments and face unique industry challenges.",
+    "source_file": "JPM, NVDA",
+    "source_chunks": [
+      "JPM_2026-02-13_it1_p004",
+      "NVDA_2026-02-25_it1A_p004"
+    ],
+    "notes": "Generated from corpus chunks (v4, multihop); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What specific licensing requirements were announced by the U.S. government in August 2022 regarding exports of NVIDIA's A100 and H100 integrated circuits?",
+    "reference_answer": "In August 2022, the U.S. government announced licensing requirements that, with certain exceptions, impact exports to China (including Hong Kong and Macau) and Russia of our A100 and H100 integrated circuits, DGX or any other systems or boards which incorporate A100 or H100 integrated circuits.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2025-02-26_it1_p004"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What was the percentage change in net income from fiscal year 2024 to fiscal year 2025 for Microsoft?",
+    "reference_answer": "16%",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it7_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What is the name of the custom AI accelerator introduced by Microsoft for AI workloads?",
+    "reference_answer": "Azure Maia",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2024-07-30_it1_p001"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What significant architectural innovation was introduced by NVIDIA in 2024 for real-time trillion-parameter inference and training?",
+    "reference_answer": "In 2024, NVIDIA launched the NVIDIA Blackwell architecture – connecting 36 Grace CPUs and 72 Blackwell GPUs in a data center scale, liquid-cooled design – for real-time trillion-parameter inference and training.",
+    "source_file": "NVDA",
+    "source_chunks": [
+      "NVDA_2026-02-25_it1_p000"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What are some factors that may lead to unexpected losses for JPMorganChase according to the risk factors disclosed?",
+    "reference_answer": "Unexpected losses for JPMorganChase may arise from inadequate or incorrect models, estimates, or judgments used in risk management activities, especially when fair value determinations rely on internally developed models or management estimates. Additionally, increased uncertainty in estimates due to differing asset acquisitions and significant judgments related to expected credit losses can also contribute to unexpected losses.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it1A_p012"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What are some potential consequences Microsoft faces due to noncompliance with existing or new data regulations?",
+    "reference_answer": "Noncompliance could result in the imposition of penalties, criminal sanctions, or orders we cease the alleged noncompliant activity.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2024-07-30_it1A_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What was the total number of employees at JPMorganChase as of December 31, 2024?",
+    "reference_answer": "317,233 employees globally",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it1_p004"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What are the potential adverse impacts of climate-related physical risks to JPMorganChase, its clients, or customers?",
+    "reference_answer": "Potential adverse impacts of climate-related physical risks to JPMorganChase, its clients or customers include: declines in asset values, including due to the destruction or degradation of property; reduced availability or increased cost of insurance for clients of JPMorganChase; interruptions to business operations, including supply chain disruption; and population migration or unemployment in affected regions.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it1A_p013"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "factual",
+    "tags": [
+      "factual"
+    ],
+    "question": "What are the potential consequences for JPMorganChase if it fails to adopt AI in a timely and judicious manner?",
+    "reference_answer": "Any efficiencies or competitive advantages that AI may offer could be squandered if JPMorganChase fails to adopt AI in a timely and judicious manner and to make related adjustments to its workforce. Any of these factors could materially and adversely affect JPMorganChase’s business and operations, results of operations, competitive position or reputation.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p012"
+    ],
+    "notes": "Generated from corpus chunks (v4, factual); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might regulatory changes impact JPMorgan Chase's ability to maintain liquidity and fund its operations?",
+    "reference_answer": "Regulatory changes could impose stricter capital requirements on JPMorgan Chase, which may limit its liquidity and increase funding costs, thereby affecting its ability to fund operations and pay dividends.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might changes in the probability of unfavorable outcomes for legal proceedings affect Microsoft's financial position?",
+    "reference_answer": "Changes in the probability of unfavorable outcomes could lead to significant adjustments in accrued liabilities, thereby impacting the overall financial statements and potentially affecting investor perceptions and stock performance.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it7_p006"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might changes in governmental policies regarding specific industries impact JPMorganChase's overall financial performance?",
+    "reference_answer": "Changes in governmental policies that discourage or penalize business relationships with certain industries could negatively affect JPMorganChase's businesses, leading to decreased revenues and increased expenses, which in turn could harm its financial performance.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2026-02-13_it1A_p000"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might JPMorganChase's relationships with clients in sensitive industries be affected by public criticism and activism, particularly during election years?",
+    "reference_answer": "JPMorganChase's relationships or ability to transact with clients and customers could be adversely affected if its decisions with respect to doing business with companies in certain sensitive industries are perceived to harm those companies or align with particular political viewpoints, especially during election years when public scrutiny is heightened.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it1A_p014"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might Microsoft's commitment to addressing racial injustice and inequity influence its employee retention and recruitment strategies?",
+    "reference_answer": "Microsoft's initiatives to address racial injustice and inequity are likely to enhance its reputation as an inclusive employer, which can attract diverse talent and improve employee retention by fostering a supportive work environment.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2024-07-30_it1_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might the growth of the AI PC category impact Microsoft's Windows OEM revenue in both developed and growth markets?",
+    "reference_answer": "The growth of the AI PC category could lead to increased demand for Windows operating system licenses, particularly if these AI PCs are popular among consumers and businesses, thereby positively impacting Windows OEM revenue.",
+    "source_file": "MSFT",
+    "source_chunks": [
+      "MSFT_2025-07-30_it1_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  },
+  {
+    "category": "reasoning",
+    "tags": [
+      "reasoning"
+    ],
+    "question": "How might the FDIC's restoration plan for the reserve ratio impact JPMorgan Chase & Co.'s operational strategies and financial planning in the coming years?",
+    "reference_answer": "The FDIC's restoration plan may lead JPMorgan Chase & Co. to adjust its operational strategies and financial planning to accommodate potential increases in bank assessments and ensure compliance with heightened supervisory standards, which could affect profitability and capital allocation.",
+    "source_file": "JPM",
+    "source_chunks": [
+      "JPM_2025-02-14_it1_p002"
+    ],
+    "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source."
+  }
+]

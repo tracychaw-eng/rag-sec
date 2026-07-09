@@ -208,6 +208,28 @@ def evaluate_results(results: list[dict], label: str, with_ragas: bool = True,
         report["ragas"] = ragas_agg
         report["ragas_per_question"] = ragas_pq
 
+    # Split-aware breakout (dev = tunable, holdout = honest generalization)
+    splits = {r.get("split", "dev") for r in results}
+    if len(splits) > 1:
+        report["by_split"] = {}
+        for split in sorted(splits):
+            subset = [r for r in results if r.get("split", "dev") == split]
+            entry = {
+                "n": len(subset),
+                "retrieval": compute_retrieval_metrics(subset)["summary"],
+            }
+            if with_ragas:
+                pq = report["ragas_per_question"]
+                ids = [r["id"] for r in subset if r["id"] in pq]
+                cols = ["faithfulness", "answer_relevancy",
+                        "context_recall", "context_precision"]
+                agg = {}
+                for c in cols:
+                    vals = [pq[i][c] for i in ids if pq[i][c] is not None]
+                    agg[c] = round(sum(vals) / len(vals), 3) if vals else None
+                entry["ragas"] = agg
+            report["by_split"][split] = entry
+
     out_path = out_dir / f"metrics_{label}.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -254,6 +276,18 @@ def _print_report(report: dict, results: list[dict]) -> None:
         n_abstained = sum(report["abstention"].values())
         print(f"\nADVERSARIAL abstention: {n_abstained}/{len(report['abstention'])}"
               f"  ⚠ {report['abstention_note'][:60]}...")
+
+    if report.get("by_split"):
+        print("\nBY SPLIT (holdout = honest generalization, never tuned on)")
+        for split, e in report["by_split"].items():
+            ret = e["retrieval"].get("overall", {})
+            line = (f"  {split:<8} n={e['n']:<4} "
+                    f"recall@K={ret.get('source_recall@K')!s:<7} "
+                    f"precision@K={ret.get('source_precision@K')!s:<7}")
+            if e.get("ragas"):
+                line += " " + " ".join(f"{k[:9]}={v}"
+                                       for k, v in e["ragas"].items())
+            print(line)
 
 
 def main():

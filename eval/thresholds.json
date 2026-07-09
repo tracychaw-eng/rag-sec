@@ -1,14 +1,15 @@
 {
-  "_comment": "Nightly eval gates. Set ~0.05-0.10 below secrag-v3 measured values (faithfulness 0.930, relevancy 0.852, recall 0.833, precision 0.933) to absorb LLM-judge noise while still catching real regressions.",
+  "_comment": "Nightly gates, calibrated to DATASET v4 dev split (90-question set, measured 2026-07-09: dev faithfulness 0.891, relevancy 0.801, recall 0.880, precision 0.804, source_recall 0.836, source_precision 0.716). Floors sit ~0.05-0.10 below measured values to absorb judge noise while catching real regressions. Recalibrate whenever the dataset version changes - thresholds are meaningless across dataset versions.",
+  "dataset_version": 4,
   "ragas": {
-    "faithfulness": 0.85,
-    "answer_relevancy": 0.75,
-    "context_recall": 0.70,
-    "context_precision": 0.80
+    "faithfulness": 0.82,
+    "answer_relevancy": 0.72,
+    "context_recall": 0.78,
+    "context_precision": 0.72
   },
   "retrieval": {
-    "source_recall@K": 0.95,
-    "source_precision@K": 0.70
+    "source_recall@K": 0.76,
+    "source_precision@K": 0.62
   },
   "abstention_rate": 0.8
 }
