@@ -68,9 +68,7 @@ jobs:
           cache: pip
       - name: Install
         run: pip install -e ".[dev]"
-      - name: Download filings from SEC EDGAR
-        run: python edgar_downloader.py
-      - name: Ingest (parse, chunk, embed, index)
-        run: python -m sec_rag.ingestion.pipeline
+      - name: Sync corpus from SEC EDGAR (download + ingest)
+        run: python -m sec_rag.ingestion.sync MSFT NVDA JPM --years 2
       - name: Run smoke gate
         run: python -m eval.smoke_gate

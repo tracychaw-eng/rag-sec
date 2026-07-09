@@ -19,10 +19,8 @@ jobs:
           cache: pip
       - name: Install
         run: pip install -e ".[dev]" ragas datasets langchain-openai
-      - name: Download filings from SEC EDGAR
-        run: python edgar_downloader.py
-      - name: Ingest (parse, chunk, embed, index)
-        run: python -m sec_rag.ingestion.pipeline
+      - name: Sync corpus from SEC EDGAR (download + ingest)
+        run: python -m sec_rag.ingestion.sync MSFT NVDA JPM --years 2
       # dev split only: thresholds are tuned on dev. The holdout split is
       # reserved for release evaluation (run manually:
       # python -m eval.run_secrag --label release-X --split holdout).

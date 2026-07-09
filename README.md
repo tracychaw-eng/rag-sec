@@ -164,7 +164,7 @@ docs/                  phase1–3 design docs · legacy-readme.md (original
 
 ## History
 
-This project began as a LlamaIndex learning journal (preserved in
+This project began as a LlamaIndex implementation journal (preserved in
 [docs/legacy-readme.md](docs/legacy-readme.md)) and was redesigned into a
 framework-free production system in three phases — quality first
 (hybrid retrieval, eval harness), then hardening (async, caching, auth,
