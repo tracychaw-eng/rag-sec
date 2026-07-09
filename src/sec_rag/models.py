@@ -83,6 +83,8 @@ class Answer(BaseModel):
     plan: QueryPlan
     contexts: list[ContextBlock]
     engine_used: str
+    trace: Optional[dict] = None     # latency spans, tokens, cost
+    cached: bool = False
 
     @property
     def retrieved_tickers(self) -> list[str]:

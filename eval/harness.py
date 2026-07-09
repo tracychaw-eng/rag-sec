@@ -196,9 +196,10 @@ def evaluate_results(results: list[dict], label: str, with_ragas: bool = True,
         "retrieval_per_question": retrieval["per_question"],
         "abstention": abstention,
         "abstention_note": (
-            "Corpus is now full 10-Ks: several adversarial answers (revenue, "
-            "headcount, CEO) ARE in the documents. Abstention gold labels are "
-            "stale — dataset revision needed before trusting this category."
+            "Dataset v2 (2026-07-08): adversarial questions are absent from "
+            "any 10-K by construction. Reports scored against dataset v1 "
+            "(labels A001/A002/A004 = revenue/headcount/CEO) have stale gold "
+            "labels for this category."
         ),
     }
 

@@ -1,0 +1,73 @@
+{
+  "label": "f003-check",
+  "date": "2026-07-08",
+  "n_questions": 3,
+  "retrieval": {
+    "factual": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 3
+    },
+    "overall": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 3
+    }
+  },
+  "retrieval_per_question": {
+    "F001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 3,
+      "missing_tickers": []
+    },
+    "F003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 2,
+      "missing_tickers": []
+    }
+  },
+  "abstention": {},
+  "abstention_note": "Corpus is now full 10-Ks: several adversarial answers (revenue, headcount, CEO) ARE in the documents. Abstention gold labels are stale \u2014 dataset revision needed before trusting this category.",
+  "ragas": {
+    "overall": {
+      "faithfulness": 0.972,
+      "answer_relevancy": 0.927,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "factual": {
+      "faithfulness": 0.972,
+      "answer_relevancy": 0.927,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    }
+  },
+  "ragas_per_question": {
+    "F001": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F003": {
+      "faithfulness": 0.917,
+      "answer_relevancy": 0.975,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.81,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    }
+  }
+}

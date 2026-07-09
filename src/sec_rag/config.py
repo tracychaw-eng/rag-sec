@@ -62,6 +62,27 @@ class Settings(BaseSettings):
     temperature: float = 0.0
     max_answer_tokens: int = 1024
 
+    # --- Resilience (OpenAI SDK built-in retry: exponential backoff on
+    #     429/5xx/connection errors; Cohere retried via tenacity) ---
+    openai_timeout_s: float = 60.0
+    openai_max_retries: int = 4
+
+    # --- Caching (in-process; CacheBackend protocol is the Redis seam) ---
+    cache_max_items: int = 2048
+    cache_ttl_s: float = 3600.0
+    enable_answer_cache: bool = True
+
+    # --- Observability ---
+    langfuse_public_key: str | None = Field(
+        default=None, validation_alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key: str | None = Field(
+        default=None, validation_alias="LANGFUSE_SECRET_KEY")
+    traces_path: Path = Path("logs/traces.jsonl")
+
+    @property
+    def langfuse_enabled(self) -> bool:
+        return bool(self.langfuse_public_key and self.langfuse_secret_key)
+
 
 def get_settings() -> Settings:
     return Settings()

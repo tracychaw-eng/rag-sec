@@ -1,0 +1,47 @@
+{
+  "label": "adversarial-v2",
+  "date": "2026-07-08",
+  "n_questions": 5,
+  "retrieval": {
+    "overall": {
+      "source_recall@K": null,
+      "source_precision@K": null,
+      "n": 0
+    }
+  },
+  "retrieval_per_question": {
+    "A001": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A002": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A003": {
+      "recall": null,
+      "precision": null,
+      "k": 3
+    },
+    "A004": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A005": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    }
+  },
+  "abstention": {
+    "A001": true,
+    "A002": true,
+    "A003": true,
+    "A004": true,
+    "A005": true
+  },
+  "abstention_note": "Corpus is now full 10-Ks: several adversarial answers (revenue, headcount, CEO) ARE in the documents. Abstention gold labels are stale \u2014 dataset revision needed before trusting this category."
+}

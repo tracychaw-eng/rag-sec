@@ -5,6 +5,7 @@ __pycache__/
 chroma_db/
 data/
 qdrant_db/
+logs/
 *.egg-info/
 .pytest_cache/
 eval/*.log

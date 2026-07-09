@@ -17,6 +17,10 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "tiktoken>=0.7",
     "requests>=2.31",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "tenacity>=8.2",
+    "langfuse>=2.0",
 ]
 
 [tool.setuptools.packages.find]

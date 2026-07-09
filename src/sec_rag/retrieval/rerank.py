@@ -1,19 +1,36 @@
 """Cross-encoder reranking via Cohere, behind a small interface so a
-self-hosted BGE reranker can slot in later without touching callers."""
+self-hosted BGE reranker can slot in later without touching callers.
 
-import time
+Retries: tenacity with exponential backoff + jitter on rate limits and
+transient server errors. If retries are exhausted, callers get the
+candidates back in fusion order — a degraded answer beats a failed request.
+"""
 
 import cohere
+from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
+                      wait_random_exponential)
 
 from ..models import ScoredChild
+from ..observability import tracing
+
+_RETRYABLE = (
+    cohere.TooManyRequestsError,
+    cohere.ServiceUnavailableError,
+    cohere.InternalServerError,
+)
 
 
 class CohereReranker:
-    def __init__(self, api_key: str, model: str = "rerank-english-v3.0",
-                 max_retries: int = 3):
+    def __init__(self, api_key: str, model: str = "rerank-english-v3.0"):
         self._client = cohere.Client(api_key=api_key)
         self.model = model
-        self.max_retries = max_retries
+
+    @retry(retry=retry_if_exception_type(_RETRYABLE),
+           wait=wait_random_exponential(multiplier=2, max=30),
+           stop=stop_after_attempt(4), reraise=True)
+    def _call(self, query: str, docs: list[str], top_n: int):
+        return self._client.rerank(
+            model=self.model, query=query, documents=docs, top_n=top_n)
 
     def rerank(self, query: str, candidates: list[ScoredChild],
                top_n: int, score_floor: float = 0.0,
@@ -24,20 +41,12 @@ class CohereReranker:
         a correct #1-ranked chunk scored 0.122 on one factual query)."""
         if not candidates:
             return []
-        docs = [c.chunk.text for c in candidates]
-
-        for attempt in range(self.max_retries):
-            try:
-                resp = self._client.rerank(
-                    model=self.model, query=query, documents=docs, top_n=top_n)
-                break
-            except cohere.errors.TooManyRequestsError:
-                wait = 10 * (attempt + 1)
-                print(f"    cohere rate limit — waiting {wait}s")
-                time.sleep(wait)
-        else:
-            # Reranker unavailable — degrade gracefully to fusion order
-            print("    cohere unavailable — falling back to RRF order")
+        try:
+            resp = self._call(query, [c.chunk.text for c in candidates], top_n)
+            tracing.record_rerank(1)
+        except Exception as e:
+            print(f"    reranker unavailable ({type(e).__name__}) — "
+                  f"falling back to RRF order")
             return candidates[:top_n]
 
         out = []

@@ -12,6 +12,7 @@ from openai import OpenAI
 
 from ..config import Settings
 from ..models import QueryPlan
+from ..observability import tracing
 
 PLANNER_PROMPT = """You are a query planner for a retrieval system over SEC 10-K filings.
 
@@ -64,6 +65,7 @@ class QueryPlanner:
             response_format={"type": "json_object"},
             temperature=0.0,
         )
+        tracing.record_llm(self.cfg.planner_model, resp.usage, kind="planner")
         try:
             data = json.loads(resp.choices[0].message.content)
             tickers = [t.upper() for t in data.get("tickers", [])

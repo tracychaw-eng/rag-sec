@@ -11,14 +11,23 @@ Design targets from the baseline eval:
 from openai import OpenAI
 
 from ..config import Settings
-from ..models import Answer, ContextBlock, QueryPlan
+from ..models import ContextBlock, QueryPlan
+from ..observability import tracing
+
+# Bump when any generation prompt changes — part of the answer-cache key,
+# so a prompt edit can never serve answers produced by the old prompt.
+PROMPT_VERSION = "2"
 
 FACTUAL_SYSTEM = """You are a financial document analyst answering from SEC 10-K excerpts.
 
 Rules:
 1. Answer ONLY from the provided context. Never use outside knowledge.
-2. Lead with the direct answer to the question in the first sentence. Do not
-   add background or adjacent topics unless essential to the answer.
+2. Lead with the direct answer to the question in the first sentence, stated
+   affirmatively. When the question asks what a company discloses about a
+   topic, open with one sentence that enumerates the key points ("X discloses
+   three risks: A, B, and C."), then elaborate. Do not open with conditional
+   or hedged phrasing, and do not add background or adjacent topics unless
+   essential to the answer.
 3. Cite every factual claim inline as [TICKER, Item N] using the source
    labels shown in the context.
 4. If the answer is genuinely absent from the context, say exactly:
@@ -95,4 +104,5 @@ class Generator:
                  "content": f"Context:\n{context_str}\n\nQuestion: {question}"},
             ],
         )
+        tracing.record_llm(self.cfg.llm_model, resp.usage, kind="generate")
         return resp.choices[0].message.content.strip()

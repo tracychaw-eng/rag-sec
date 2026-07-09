@@ -1,10 +1,11 @@
 {
   "metadata": {
     "created": "2026-03-28",
-    "corpus": ["msft_10k.txt", "nvda_10k.txt", "jpm_10k.txt"],
-    "embedding_model": "text-embedding-3-small",
-    "chunk_size": 512,
-    "chunk_overlap": 50,
+    "revised": "2026-07-08",
+    "revision_note": "Adversarial set rewritten for the full-10-K corpus: the original A001 (revenue), A002 (headcount), and A004 (CEO) answers ARE present in full 10-Ks, so correct abstention was no longer the right gold behavior. New adversarial questions are absent from any 10-K by construction (market data, forecasts, analyst opinion, out-of-corpus company). The retired questions are good candidates for future factual questions.",
+    "version": 2,
+    "corpus": ["MSFT_10K_2025-07-30", "NVDA_10K_2026-02-25", "JPM_10K_2026-02-13"],
+    "corpus_scope": "full 10-K filings (all Items), not just Item 1A",
     "total_questions": 20,
     "categories": {
       "factual": 5,
@@ -137,47 +138,47 @@
     {
       "id": "A001",
       "category": "adversarial",
-      "question": "What was Microsoft's total revenue in the most recent fiscal year?",
+      "question": "What is Microsoft's current stock price, and how has it moved since the 10-K was filed?",
       "reference_answer": "NOT IN DOCUMENTS",
-      "expected_behavior": "System should state that revenue figures are not present in the provided risk factors sections.",
+      "expected_behavior": "System should state that market prices are not present in 10-K filings.",
       "source_file": "none",
-      "notes": "Tests hallucination — financial results not in risk factors section"
+      "notes": "Market data — never in a 10-K. Replaced v1 revenue question (revenue IS in the full 10-K)."
     },
     {
       "id": "A002",
       "category": "adversarial",
-      "question": "How many employees does Nvidia have?",
+      "question": "What revenue does NVIDIA forecast for fiscal year 2028?",
       "reference_answer": "NOT IN DOCUMENTS",
-      "expected_behavior": "System should state employee count is not in the provided documents.",
+      "expected_behavior": "System should state that multi-year revenue forecasts are not provided in the filing.",
       "source_file": "none",
-      "notes": ""
+      "notes": "Forward guidance — not in 10-Ks. Replaced v1 headcount question (headcount IS in Item 1)."
     },
     {
       "id": "A003",
       "category": "adversarial",
       "question": "What is JPMorgan Chase's current dividend yield?",
       "reference_answer": "NOT IN DOCUMENTS",
-      "expected_behavior": "System should state dividend information is not covered in the risk factors.",
+      "expected_behavior": "System should state that dividend yield requires current market price, which is not in the filing.",
       "source_file": "none",
-      "notes": ""
+      "notes": "Kept from v1 — yield needs stock price, genuinely absent (declared dividends alone are insufficient)."
     },
     {
       "id": "A004",
       "category": "adversarial",
-      "question": "Who is the current CEO of Nvidia?",
+      "question": "What are Apple's main risk factors according to its 10-K?",
       "reference_answer": "NOT IN DOCUMENTS",
-      "expected_behavior": "System should state executive information is not in the provided sections.",
+      "expected_behavior": "System should state that Apple's filings are not in the corpus (only MSFT, NVDA, JPM).",
       "source_file": "none",
-      "notes": ""
+      "notes": "Out-of-corpus company. Replaced v1 CEO question (executive officers ARE in the full 10-K)."
     },
     {
       "id": "A005",
       "category": "adversarial",
-      "question": "What was Nvidia's GPU market share in the data center segment last year?",
+      "question": "How did Wall Street analysts rate NVIDIA's stock after its most recent 10-K filing?",
       "reference_answer": "NOT IN DOCUMENTS",
-      "expected_behavior": "System should state market share data is not available in the provided documents.",
+      "expected_behavior": "System should state that analyst opinions are not part of SEC filings.",
       "source_file": "none",
-      "notes": ""
+      "notes": "Third-party opinion — never in a 10-K. Replaced v1 market-share question (borderline: NVDA discusses competitive position qualitatively)."
     }
   ]
 }

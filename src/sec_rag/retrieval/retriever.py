@@ -14,9 +14,11 @@ from openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client import models as qm
 
+from ..cache import TTLCache, cache_key
 from ..config import Settings
 from ..ingestion.store import ChunkStore
 from ..models import ChildChunk, ContextBlock, ScoredChild
+from ..observability import tracing
 from .bm25 import BM25Index
 from .fusion import rrf
 from .rerank import CohereReranker
@@ -26,13 +28,18 @@ class HybridRetriever:
     def __init__(self, cfg: Settings, store: ChunkStore | None = None,
                  qdrant: QdrantClient | None = None,
                  openai_client: OpenAI | None = None,
-                 reranker: CohereReranker | None = None):
+                 reranker: CohereReranker | None = None,
+                 embed_cache: TTLCache | None = None):
         self.cfg = cfg
         self.store = store or ChunkStore(cfg.store_dir)
         self.qdrant = qdrant or QdrantClient(path=str(cfg.qdrant_path))
         self.openai = openai_client or OpenAI(api_key=cfg.openai_api_key)
         self.reranker = reranker or CohereReranker(
             api_key=cfg.cohere_api_key, model=cfg.rerank_model)
+        # Query-embedding cache: multi-query retrieval re-embeds the same
+        # rewrites often (eval reruns, paraphrase overlap, repeat questions)
+        self.embed_cache = embed_cache or TTLCache(
+            max_items=cfg.cache_max_items, ttl_s=cfg.cache_ttl_s)
 
         children = self.store.load_children()
         self.children_by_id: dict[str, ChildChunk] = {c.id: c for c in children}
@@ -41,9 +48,16 @@ class HybridRetriever:
 
     # ------------------------------------------------------------------
     def _embed(self, text: str) -> list[float]:
+        key = cache_key("embed", self.cfg.embed_model, text)
+        cached = self.embed_cache.get(key)
+        if cached is not None:
+            return cached
         resp = self.openai.embeddings.create(
             model=self.cfg.embed_model, input=[text])
-        return resp.data[0].embedding
+        tracing.record_llm(self.cfg.embed_model, resp.usage, kind="embedding")
+        vec = resp.data[0].embedding
+        self.embed_cache.set(key, vec)
+        return vec
 
     def _dense_search(self, query: str, top_k: int,
                       tickers: list[str] | None) -> list[str]:
