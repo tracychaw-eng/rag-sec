@@ -1,0 +1,112 @@
+# Kubernetes deployment for sec-rag.
+#
+# Prerequisites:
+#   kubectl create namespace sec-rag
+#   kubectl -n sec-rag create secret generic sec-rag-keys \
+#     --from-literal=OPENAI_API_KEY=... \
+#     --from-literal=COHERE_API_KEY=... \
+#     --from-literal=SECRAG_API_KEYS=...
+#   A PVC (sec-rag-corpus) pre-populated with data/store + qdrant_db —
+#   run the ingestion job below (or copy from a build machine).
+#
+# NOTE: replicas is pinned to 1 because Qdrant local mode takes an
+# exclusive file lock on its volume. To scale horizontally: run a Qdrant
+# server (or managed) and point the retriever at it, then raise replicas —
+# Redis already makes caches/sessions/rate limits replica-safe.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sec-rag-api
+  namespace: sec-rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: sec-rag-api}
+  template:
+    metadata:
+      labels: {app: sec-rag-api}
+    spec:
+      containers:
+        - name: api
+          # Published by the CI publish-image job on pushes to master
+          image: ghcr.io/OWNER/llamaindex-sec:latest   # <- set your org/repo
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef: {name: sec-rag-keys}
+          env:
+            - name: SECRAG_REDIS_URL
+              value: redis://sec-rag-redis:6379/0
+            # - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            #   value: http://otel-collector.observability:4318
+          volumeMounts:
+            - {name: corpus, mountPath: /app/data/store, subPath: store}
+            - {name: corpus, mountPath: /app/qdrant_db, subPath: qdrant_db}
+          readinessProbe:
+            httpGet: {path: /health, port: 8000}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /health, port: 8000}
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests: {cpu: 500m, memory: 1Gi}
+            limits: {cpu: "2", memory: 2Gi}
+      volumes:
+        - name: corpus
+          persistentVolumeClaim: {claimName: sec-rag-corpus}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sec-rag-api
+  namespace: sec-rag
+spec:
+  selector: {app: sec-rag-api}
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sec-rag-redis
+  namespace: sec-rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: sec-rag-redis}
+  template:
+    metadata:
+      labels: {app: sec-rag-redis}
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 256Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sec-rag-redis
+  namespace: sec-rag
+spec:
+  selector: {app: sec-rag-redis}
+  ports:
+    - port: 6379
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sec-rag-corpus
+  namespace: sec-rag
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 2Gi}

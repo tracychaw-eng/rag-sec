@@ -2,7 +2,8 @@ import pytest
 from fastapi import HTTPException
 
 from sec_rag.api import app as app_module
-from sec_rag.api.app import SlidingWindowLimiter, require_caller
+from sec_rag.api.app import require_caller
+from sec_rag.ratelimit import SlidingWindowLimiter
 
 
 class _StubCfg:

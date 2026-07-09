@@ -12,6 +12,7 @@ way — the sink is the only difference.
 
 import contextvars
 import json
+import logging
 import time
 import uuid
 from contextlib import contextmanager
@@ -85,7 +86,9 @@ class RequestTrace:
             "name": self.name,
             "started_at": self._started_at,
             "total_ms": round((time.monotonic() - self._t0) * 1000, 1),
-            "spans": [{"name": s.name, "ms": s.duration_ms, **s.attrs}
+            "spans": [{"name": s.name, "ms": s.duration_ms,
+                       "offset_ms": round((s.start - self._t0) * 1000, 1),
+                       **s.attrs}
                       for s in self.spans],
             "llm_calls": self.llm_calls,
             "prompt_tokens": sum(c["prompt_tokens"] for c in self.llm_calls),
@@ -160,10 +163,84 @@ class LangfuseSink:
         self._lf.flush()
 
 
-def make_sink(langfuse_enabled: bool, jsonl_path: Path):
+class OtelSink:
+    """Re-emits request traces as OpenTelemetry spans.
+
+    Timestamps are reconstructed from the trace's epoch start plus each
+    span's recorded offset, so waterfalls in any OTLP backend (Jaeger,
+    Tempo, Datadog) match reality. Pass an exporter explicitly for tests;
+    by default the OTLP HTTP exporter reads OTEL_EXPORTER_OTLP_ENDPOINT.
+    """
+
+    _NUMERIC = ("total_ms", "prompt_tokens", "completion_tokens",
+                "rerank_searches", "cost_usd")
+
+    def __init__(self, exporter=None):
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import (BatchSpanProcessor,
+                                                    SimpleSpanProcessor)
+        if exporter is None:
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+                OTLPSpanExporter)
+            processor = BatchSpanProcessor(OTLPSpanExporter())
+        else:
+            # Explicit exporter (tests, console): flush synchronously
+            processor = SimpleSpanProcessor(exporter)
+        self._provider = TracerProvider(
+            resource=Resource.create({"service.name": "sec-rag"}))
+        self._provider.add_span_processor(processor)
+        self._tracer = self._provider.get_tracer("sec_rag")
+
+    def export(self, summary: dict) -> None:
+        from opentelemetry.trace import set_span_in_context
+        start_ns = int(summary["started_at"] * 1e9)
+        end_ns = start_ns + int(summary["total_ms"] * 1e6)
+
+        attrs = {k: summary[k] for k in self._NUMERIC if k in summary}
+        attrs["engine"] = summary.get("engine", "")
+        root = self._tracer.start_span(
+            summary["name"], start_time=start_ns, attributes=attrs)
+        ctx = set_span_in_context(root)
+        for s in summary["spans"]:
+            s_start = start_ns + int(s.get("offset_ms", 0) * 1e6)
+            child = self._tracer.start_span(
+                s["name"], context=ctx, start_time=s_start,
+                attributes={k: v for k, v in s.items()
+                            if isinstance(v, (str, int, float, bool))})
+            child.end(end_time=s_start + int(s["ms"] * 1e6))
+        root.end(end_time=end_ns)
+
+
+class MultiSink:
+    def __init__(self, sinks: list):
+        self.sinks = sinks
+
+    def export(self, summary: dict) -> None:
+        for sink in self.sinks:
+            try:
+                sink.export(summary)
+            except Exception:
+                logging.getLogger("sec_rag.tracing").warning(
+                    "trace export failed", exc_info=True,
+                    extra={"sink": type(sink).__name__})
+
+
+def make_sink(langfuse_enabled: bool, jsonl_path: Path,
+              otel_endpoint: str | None = None):
+    """JSONL always (local record); Langfuse and OTel added when configured."""
+    log = logging.getLogger("sec_rag.tracing")
+    sinks: list = [JsonlSink(jsonl_path)]
     if langfuse_enabled:
         try:
-            return LangfuseSink()
-        except Exception as e:
-            print(f"Langfuse init failed ({e}) — falling back to JSONL")
-    return JsonlSink(jsonl_path)
+            sinks.append(LangfuseSink())
+        except Exception:
+            log.warning("Langfuse init failed — continuing without it",
+                        exc_info=True)
+    if otel_endpoint:
+        try:
+            sinks.append(OtelSink())
+        except Exception:
+            log.warning("OTel init failed — continuing without it",
+                        exc_info=True)
+    return sinks[0] if len(sinks) == 1 else MultiSink(sinks)

@@ -90,7 +90,10 @@ class Settings(BaseSettings):
         default=None, validation_alias="LANGFUSE_PUBLIC_KEY")
     langfuse_secret_key: str | None = Field(
         default=None, validation_alias="LANGFUSE_SECRET_KEY")
+    otel_endpoint: str | None = Field(
+        default=None, validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT")
     traces_path: Path = Path("logs/traces.jsonl")
+    log_json: bool = True   # structured JSON logs in the API server
 
     @property
     def langfuse_enabled(self) -> bool:

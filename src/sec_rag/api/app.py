@@ -15,53 +15,40 @@ share them across replicas.
 """
 
 import json
-import threading
-import time
-from collections import defaultdict, deque
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from ..observability.logs import setup_logging
 from ..pipeline import RAGPipeline
+from ..ratelimit import make_limiter
 from ..sessions import make_session_store
 
+logger = logging.getLogger("sec_rag.api")
+
 _state: dict = {}
-
-
-# ---------------------------------------------------------------------------
-# Rate limiting — sliding window per API key (in-process; use a Redis-based
-# limiter when running multiple replicas)
-# ---------------------------------------------------------------------------
-class SlidingWindowLimiter:
-    def __init__(self, per_minute: int):
-        self.per_minute = per_minute
-        self._events: dict[str, deque] = defaultdict(deque)
-        self._lock = threading.Lock()
-
-    def check(self, key: str) -> float | None:
-        """Returns None if allowed, else seconds until the next slot."""
-        now = time.monotonic()
-        with self._lock:
-            q = self._events[key]
-            while q and q[0] <= now - 60:
-                q.popleft()
-            if len(q) >= self.per_minute:
-                return max(0.0, 60 - (now - q[0]))
-            q.append(now)
-            return None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     pipeline = RAGPipeline()          # loads chunk store + BM25 once
+    setup_logging(json_output=pipeline.cfg.log_json)
     _state["pipeline"] = pipeline
     _state["sessions"] = make_session_store(pipeline.cfg.redis_url)
-    _state["limiter"] = SlidingWindowLimiter(pipeline.cfg.rate_limit_per_minute)
+    _state["limiter"] = make_limiter(pipeline.cfg.rate_limit_per_minute,
+                                     pipeline.cfg.redis_url)
+    logger.info("sec-rag api ready", extra={
+        "children": len(pipeline.retriever.children_by_id),
+        "auth": bool(pipeline.cfg.api_key_set),
+        "redis": bool(pipeline.cfg.redis_url),
+    })
     if not pipeline.cfg.api_key_set:
-        print("WARNING: SECRAG_API_KEYS not set — API auth is DISABLED. "
-              "Do not expose this server beyond localhost.")
+        logger.warning(
+            "SECRAG_API_KEYS not set — API auth is DISABLED. "
+            "Do not expose this server beyond localhost.")
     yield
     _state.clear()
 

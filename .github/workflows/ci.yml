@@ -29,6 +29,28 @@ jobs:
       - name: Build image
         run: docker build -t sec-rag:ci .
 
+  # Publish to GHCR on every push to master: :latest + :<sha>
+  publish-image:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [lint-and-test, docker-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        run: |
+          IMAGE=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t "$IMAGE:latest" -t "$IMAGE:${{ github.sha }}" .
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:${{ github.sha }}"
+
   # Full pipeline smoke: downloads filings from EDGAR, ingests (embeds),
   # and runs the eval smoke gate. Costs a few cents in API calls, so it
   # only runs on manual dispatch and requires repo secrets.

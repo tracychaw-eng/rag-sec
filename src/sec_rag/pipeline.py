@@ -47,7 +47,8 @@ class RAGPipeline:
         self.answer_cache = make_cache("answer", self.cfg.cache_max_items,
                                        self.cfg.cache_ttl_s, self.cfg.redis_url)
         self.trace_sink = tracing.make_sink(
-            self.cfg.langfuse_enabled, self.cfg.traces_path)
+            self.cfg.langfuse_enabled, self.cfg.traces_path,
+            otel_endpoint=self.cfg.otel_endpoint)
         self._sync_loop: asyncio.AbstractEventLoop | None = None
 
     def cache_stats(self) -> dict:

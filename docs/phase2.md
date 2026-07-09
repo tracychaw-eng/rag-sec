@@ -139,9 +139,50 @@ container per volume; move to a Qdrant server for replicas.
   questions, citations present, the $28.9B figure retrievable, R002
   retrieves JPM, adversarial abstains. Exit 1 fails the run.
 
-## Remaining / next (Phase 2+)
+## Phase 2+ (2026-07-08, third change set)
 
-- Redis-backed rate limiter (current one is per-process)
-- Publish image + deploy target (compose/k8s manifest)
-- Nightly full-RAGAS workflow with threshold alerts
-- Structured logging (JSON) + OTel exporter alongside Langfuse
+### Redis-backed rate limiter
+
+`ratelimit.make_limiter()` selects the backend: in-process sliding window
+without Redis, Redis fixed-window (INCR + EXPIRE per minute-bucket) with
+`SECRAG_REDIS_URL` — the limit holds across replicas instead of
+multiplying by replica count. Verified live under compose: 60/min budget
+returned exactly 429 beyond it.
+
+### Deploy targets
+
+- `docker-compose.yml`: API + Redis, corpus volumes, one command up.
+- `deploy/k8s.yaml`: Deployment/Service/PVC + Redis; replicas pinned to 1
+  with the Qdrant-local-lock caveat documented (move to a Qdrant server to
+  scale out — Redis already makes everything else replica-safe).
+- CI `publish-image` job pushes `ghcr.io/<repo>:latest` + `:<sha>` on
+  every push to master (GITHUB_TOKEN, no extra secrets).
+
+### Nightly full-RAGAS workflow
+
+`.github/workflows/nightly-eval.yml` (07:00 UTC + manual): EDGAR download
+→ ingest → full 20-question RAGAS run → `eval/check_thresholds.py`
+against `eval/thresholds.json` (floors set ~0.05–0.10 under measured
+values to absorb judge noise). A breach fails the run — GitHub notifies —
+and posts to Slack if the `SLACK_WEBHOOK_URL` secret exists. Reports
+upload as artifacts either way.
+
+### Structured logging + OTel
+
+- `observability/logs.py`: one JSON object per line (ts/level/logger/
+  message + extras), uvicorn loggers routed through the same formatter;
+  enabled in the API lifespan (`SECRAG_LOG_JSON=false` for plain text).
+  Serving-path prints replaced with loggers.
+- `observability/tracing.py` grew an `OtelSink`: request traces re-emit as
+  real OTel spans with reconstructed timestamps (spans now record start
+  offsets), exported over OTLP-HTTP when `OTEL_EXPORTER_OTLP_ENDPOINT` is
+  set. Sinks compose: JSONL always, Langfuse and OTel when configured;
+  one sink failing never blocks another (`MultiSink`).
+
+## Remaining / next (Phase 3)
+
+- Scale-out retrieval: Qdrant server + replicas > 1
+- Multi-year/multi-company corpus + scheduled EDGAR sync
+- Table-aware extraction and numeric QA
+- Semantic/episodic user memory with governance
+- Online judge sampling on production traffic

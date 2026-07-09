@@ -6,12 +6,16 @@ transient server errors. If retries are exhausted, callers get the
 candidates back in fusion order — a degraded answer beats a failed request.
 """
 
+import logging
+
 import cohere
 from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
                       wait_random_exponential)
 
 from ..models import ScoredChild
 from ..observability import tracing
+
+logger = logging.getLogger("sec_rag.rerank")
 
 _RETRYABLE = (
     cohere.TooManyRequestsError,
@@ -46,8 +50,8 @@ class CohereReranker:
                 query, [c.chunk.text for c in candidates], top_n)
             tracing.record_rerank(1)
         except Exception as e:
-            print(f"    reranker unavailable ({type(e).__name__}) — "
-                  f"falling back to RRF order")
+            logger.warning("reranker unavailable — falling back to RRF order",
+                           extra={"error_type": type(e).__name__})
             return candidates[:top_n]
 
         out = []

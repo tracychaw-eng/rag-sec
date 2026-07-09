@@ -22,6 +22,8 @@ dependencies = [
     "tenacity>=8.2",
     "langfuse>=2.0",
     "redis>=5.0",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-exporter-otlp-proto-http>=1.25",
 ]
 
 [project.optional-dependencies]

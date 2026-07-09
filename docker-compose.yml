@@ -1,0 +1,32 @@
+# Local/single-host deployment: API + Redis (caches, sessions, rate limits).
+#
+#   docker compose up --build
+#   curl -H "X-API-Key: dev-key" -X POST localhost:8000/query \
+#        -H "Content-Type: application/json" -d '{"question": "..."}'
+#
+# Requires an ingested corpus on the host (python -m sec_rag.ingestion.pipeline)
+# and OPENAI_API_KEY / COHERE_API_KEY in the environment or a .env file.
+
+services:
+  api:
+    build: .
+    image: sec-rag:local
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      COHERE_API_KEY: ${COHERE_API_KEY}
+      SECRAG_API_KEYS: ${SECRAG_API_KEYS:-dev-key}
+      SECRAG_REDIS_URL: redis://redis:6379/0
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY: set to enable Langfuse
+    volumes:
+      - ./data/store:/app/data/store
+      - ./qdrant_db:/app/qdrant_db
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    # No host port — internal only. Uncomment to inspect from the host:
+    # ports: ["6379:6379"]
