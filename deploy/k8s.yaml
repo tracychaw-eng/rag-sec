@@ -29,7 +29,7 @@ spec:
       containers:
         - name: api
           # Published by the CI publish-image job on pushes to master
-          image: ghcr.io/OWNER/llamaindex-sec:latest   # <- set your org/repo
+          image: ghcr.io/OWNER/rag-sec:latest   # <- set your org/repo
           ports:
             - containerPort: 8000
           envFrom:

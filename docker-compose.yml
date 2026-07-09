@@ -10,6 +10,10 @@
 # rate limits, the API scales horizontally:
 #   docker compose up --scale api=2   (add a load balancer for a single port)
 
+# Pinned project name: volumes/networks stay stable even if the folder
+# is renamed (compose otherwise derives the project from the folder name).
+name: rag-sec
+
 services:
   api:
     build: .
