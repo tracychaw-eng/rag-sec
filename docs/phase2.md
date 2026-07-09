@@ -86,11 +86,62 @@ sync clients — async clients are a Phase 2 follow-up.
 - Trace log: spans plan 1.3s / retrieve 1.0s / generate 10.2s, token and
   cost accounting per request.
 
-## Remaining Phase 2 work
+## Phase 2 completion (2026-07-08, second change set)
 
-- Docker image + CI (lint, unit tests, eval smoke gate)
-- Async clients + streaming responses (SSE) on /chat
-- Redis backends for caches + session store
-- API auth + rate limiting
-- Latency: generation dominates (~10s on comparison questions) — consider
-  streaming and/or smaller context budgets
+### Async core + parallel retrieval
+
+The whole request path is async (`AsyncOpenAI`, `AsyncQdrantClient`,
+`cohere.AsyncClient`). Multi-query dense searches run concurrently, and
+comparison/reasoning per-ticker fan-outs run in parallel with
+`asyncio.gather` — comparison retrieval for two tickers now completes in
+~1.0s total (previously sequential per ticker). `answer_sync()` is the
+facade for CLI/eval callers; it reuses one private event loop because
+`asyncio.run()` per call orphans the async clients' pooled connections
+(observed: intermittent Cohere RuntimeErrors on 2nd+ call).
+
+### SSE streaming
+
+`POST /chat/{session_id}/stream` emits `meta` (intent/engine as soon as
+retrieval finishes) → `delta`* (tokens) → `done` (latency, cost, trace id,
+context provenance). First token arrives after plan+retrieve (~2.5s)
+instead of the full ~7-10s. Streamed answers still hit the answer cache
+and cost metering (usage comes from the final stream chunk).
+
+### Redis backends
+
+`SECRAG_REDIS_URL` switches the answer cache, embedding cache
+(`cache.RedisCache`), and chat sessions (`sessions.RedisSessionStore`)
+from in-process to Redis. Values are JSON so backends are interchangeable;
+unit-tested against fakeredis. Unset = in-process (single replica dev).
+
+### Auth + rate limiting
+
+`SECRAG_API_KEYS` (comma-separated) enables `X-API-Key` auth: 401 missing,
+403 wrong, per-key sliding-window rate limit (`SECRAG_RATE_LIMIT_PER_MINUTE`,
+default 60) returning 429 + Retry-After. Empty keys = auth disabled with a
+loud startup warning (local dev only). `/health` stays unauthenticated for
+load balancers.
+
+### Docker
+
+Code-only image (`docker build -t sec-rag .`); corpus mounted at runtime
+(`./data/store`, `./qdrant_db`), keys via env. Non-root user, healthcheck
+on `/health`. Qdrant local mode takes an exclusive file lock — one
+container per volume; move to a Qdrant server for replicas.
+
+### CI (`.github/workflows/ci.yml`)
+
+- `lint-and-test`: ruff + 34 unit tests on every push/PR
+- `docker-build`: image builds on every push/PR
+- `eval-smoke-gate` (manual dispatch, needs `OPENAI_API_KEY`/`COHERE_API_KEY`
+  secrets): downloads filings from EDGAR, ingests, runs `eval/smoke_gate.py`
+  — deterministic assertions (no LLM judge): source recall on known-source
+  questions, citations present, the $28.9B figure retrievable, R002
+  retrieves JPM, adversarial abstains. Exit 1 fails the run.
+
+## Remaining / next (Phase 2+)
+
+- Redis-backed rate limiter (current one is per-process)
+- Publish image + deploy target (compose/k8s manifest)
+- Nightly full-RAGAS workflow with threshold alerts
+- Structured logging (JSON) + OTel exporter alongside Langfuse

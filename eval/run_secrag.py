@@ -49,7 +49,7 @@ def main():
     for i, item in enumerate(questions, 1):
         print(f"[{item['id']}] ({i}/{len(questions)}) {item['question'][:70]}...")
         t0 = time.time()
-        ans = pipeline.answer(item["question"])
+        ans = pipeline.answer_sync(item["question"])
         elapsed = time.time() - t0
 
         print(f"  intent={ans.plan.intent} tickers={ans.plan.tickers} "

@@ -1,15 +1,15 @@
-"""In-process TTL+LRU caches for query embeddings, plans, and answers.
+"""Caches for query embeddings and answers: in-process TTL+LRU by default,
+Redis when SECRAG_REDIS_URL is set (required once the service runs more
+than one replica).
 
-Deliberately dependency-free: at single-instance scale an in-process cache
-is correct and free. The `CacheBackend` protocol is the seam where Redis
-slots in when the service scales horizontally (Phase 2+): implement the
-same three methods against a Redis client and swap in config.
-
-Keys always include the model/corpus/prompt version that produced the
-value, so a model swap or re-ingest can never serve stale entries.
+Cached values must be JSON-serializable (lists, dicts, strings) so the two
+backends are interchangeable. Keys always include the model/corpus/prompt
+version that produced the value, so a model swap or re-ingest can never
+serve stale entries.
 """
 
 import hashlib
+import json
 import threading
 import time
 from collections import OrderedDict
@@ -23,7 +23,7 @@ class CacheBackend(Protocol):
 
 
 class TTLCache:
-    """Thread-safe LRU cache with per-entry TTL."""
+    """Thread-safe in-process LRU cache with per-entry TTL."""
 
     def __init__(self, max_items: int = 2048, ttl_s: float = 3600.0):
         self.max_items = max_items
@@ -58,11 +58,59 @@ class TTLCache:
     def stats(self) -> dict:
         total = self.hits + self.misses
         return {
+            "backend": "memory",
             "items": len(self._data),
             "hits": self.hits,
             "misses": self.misses,
             "hit_rate": round(self.hits / total, 3) if total else None,
         }
+
+
+class RedisCache:
+    """Redis-backed cache. Values stored as JSON with per-key TTL.
+
+    Uses the sync redis client: individual GET/SETEX round-trips are
+    sub-millisecond on a local/near network and not worth the complexity
+    of a second (async) client in the same codebase yet.
+    """
+
+    def __init__(self, url: str, namespace: str, ttl_s: float = 3600.0):
+        import redis
+        self._r = redis.Redis.from_url(url, decode_responses=True)
+        self.ns = namespace
+        self.ttl_s = int(ttl_s)
+        self.hits = 0
+        self.misses = 0
+
+    def _k(self, key: str) -> str:
+        return f"secrag:{self.ns}:{key}"
+
+    def get(self, key: str) -> Optional[Any]:
+        raw = self._r.get(self._k(key))
+        if raw is None:
+            self.misses += 1
+            return None
+        self.hits += 1
+        return json.loads(raw)
+
+    def set(self, key: str, value: Any) -> None:
+        self._r.setex(self._k(key), self.ttl_s, json.dumps(value))
+
+    def stats(self) -> dict:
+        total = self.hits + self.misses
+        return {
+            "backend": "redis",
+            "hits": self.hits,
+            "misses": self.misses,
+            "hit_rate": round(self.hits / total, 3) if total else None,
+        }
+
+
+def make_cache(namespace: str, max_items: int, ttl_s: float,
+               redis_url: str | None = None) -> CacheBackend:
+    if redis_url:
+        return RedisCache(redis_url, namespace, ttl_s)
+    return TTLCache(max_items=max_items, ttl_s=ttl_s)
 
 
 def cache_key(*parts: str) -> str:

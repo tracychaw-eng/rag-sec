@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: ruff check src tests eval
+      - name: Unit tests
+        run: pytest tests/unit -q
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t sec-rag:ci .
+
+  # Full pipeline smoke: downloads filings from EDGAR, ingests (embeds),
+  # and runs the eval smoke gate. Costs a few cents in API calls, so it
+  # only runs on manual dispatch and requires repo secrets.
+  eval-smoke-gate:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Download filings from SEC EDGAR
+        run: python edgar_downloader.py
+      - name: Ingest (parse, chunk, embed, index)
+        run: python -m sec_rag.ingestion.pipeline
+      - name: Run smoke gate
+        run: python -m eval.smoke_gate

@@ -3,41 +3,95 @@
 Run:
     uvicorn sec_rag.api.app:app --port 8000
 
-Endpoints:
-    GET  /health              — pipeline readiness + corpus/cache stats
-    POST /query               — single-shot question
-    POST /chat/{session_id}   — multi-turn; history feeds the query planner's
-                                rewrite step (standalone-query condensation)
+Endpoints (all under X-API-Key auth when SECRAG_API_KEYS is set):
+    GET    /health                  — readiness + corpus/cache stats (no auth)
+    POST   /query                   — single-shot question
+    POST   /chat/{session_id}        — multi-turn (planner condenses follow-ups)
+    POST   /chat/{session_id}/stream — same, but SSE token streaming
+    DELETE /chat/{session_id}        — clear session
 
-The pipeline is synchronous (OpenAI/Cohere sync clients), so endpoints are
-plain `def` — FastAPI runs them on its threadpool. Session history is
-in-process (dict); swap for Redis when running more than one replica.
+Sessions and caches are in-process by default; set SECRAG_REDIS_URL to
+share them across replicas.
 """
 
+import json
 import threading
-from collections import defaultdict
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..pipeline import RAGPipeline
-
-MAX_HISTORY_TURNS = 10
+from ..sessions import make_session_store
 
 _state: dict = {}
-_sessions: dict[str, list[dict]] = defaultdict(list)
-_sessions_lock = threading.Lock()
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting — sliding window per API key (in-process; use a Redis-based
+# limiter when running multiple replicas)
+# ---------------------------------------------------------------------------
+class SlidingWindowLimiter:
+    def __init__(self, per_minute: int):
+        self.per_minute = per_minute
+        self._events: dict[str, deque] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def check(self, key: str) -> float | None:
+        """Returns None if allowed, else seconds until the next slot."""
+        now = time.monotonic()
+        with self._lock:
+            q = self._events[key]
+            while q and q[0] <= now - 60:
+                q.popleft()
+            if len(q) >= self.per_minute:
+                return max(0.0, 60 - (now - q[0]))
+            q.append(now)
+            return None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    _state["pipeline"] = RAGPipeline()   # loads chunk store + BM25 once
+    pipeline = RAGPipeline()          # loads chunk store + BM25 once
+    _state["pipeline"] = pipeline
+    _state["sessions"] = make_session_store(pipeline.cfg.redis_url)
+    _state["limiter"] = SlidingWindowLimiter(pipeline.cfg.rate_limit_per_minute)
+    if not pipeline.cfg.api_key_set:
+        print("WARNING: SECRAG_API_KEYS not set — API auth is DISABLED. "
+              "Do not expose this server beyond localhost.")
     yield
     _state.clear()
 
 
 app = FastAPI(title="sec-rag", version="0.2.0", lifespan=lifespan)
+
+
+# ---------------------------------------------------------------------------
+# Auth + rate-limit dependency
+# ---------------------------------------------------------------------------
+def require_caller(x_api_key: str | None = Header(default=None)) -> str:
+    pipeline: RAGPipeline = _state["pipeline"]
+    keys = pipeline.cfg.api_key_set
+
+    if keys:
+        if x_api_key is None:
+            raise HTTPException(status_code=401,
+                                detail="Missing X-API-Key header")
+        if x_api_key not in keys:
+            raise HTTPException(status_code=403, detail="Invalid API key")
+        caller = x_api_key
+    else:
+        caller = "anonymous"          # dev mode — auth disabled
+
+    retry_after = _state["limiter"].check(caller)
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429, detail="Rate limit exceeded",
+            headers={"Retry-After": str(int(retry_after) + 1)})
+    return caller
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +153,7 @@ def health():
         raise HTTPException(status_code=503, detail="pipeline not ready")
     return {
         "status": "ok",
+        "auth": "enabled" if pipeline.cfg.api_key_set else "DISABLED",
         "tickers": pipeline.retriever.store.available_tickers(),
         "children_indexed": len(pipeline.retriever.children_by_id),
         "parents": len(pipeline.retriever.parents_by_id),
@@ -108,30 +163,50 @@ def health():
 
 
 @app.post("/query", response_model=QueryResponse)
-def query(req: QueryRequest):
+async def query(req: QueryRequest, caller: str = Depends(require_caller)):
     pipeline: RAGPipeline = _state["pipeline"]
-    ans = pipeline.answer(req.question)
+    ans = await pipeline.answer(req.question)
     return _to_response(ans)
 
 
 @app.post("/chat/{session_id}", response_model=QueryResponse)
-def chat(session_id: str, req: QueryRequest):
+async def chat(session_id: str, req: QueryRequest,
+               caller: str = Depends(require_caller)):
     pipeline: RAGPipeline = _state["pipeline"]
-    with _sessions_lock:
-        history = list(_sessions[session_id])
+    sessions = _state["sessions"]
+    history = sessions.get(session_id)
 
-    ans = pipeline.answer(req.question, history=history or None)
+    ans = await pipeline.answer(req.question, history=history or None)
 
-    with _sessions_lock:
-        s = _sessions[session_id]
-        s.append({"role": "user", "content": req.question})
-        s.append({"role": "assistant", "content": ans.text})
-        del s[:-2 * MAX_HISTORY_TURNS]
+    sessions.append(session_id, "user", req.question)
+    sessions.append(session_id, "assistant", ans.text)
     return _to_response(ans)
 
 
+@app.post("/chat/{session_id}/stream")
+async def chat_stream(session_id: str, req: QueryRequest,
+                      caller: str = Depends(require_caller)):
+    """Server-Sent Events: `meta` → `delta`* → `done`."""
+    pipeline: RAGPipeline = _state["pipeline"]
+    sessions = _state["sessions"]
+    history = sessions.get(session_id)
+
+    async def event_stream():
+        answer_text = ""
+        async for event in pipeline.answer_stream(
+                req.question, history=history or None):
+            if event["type"] == "done":
+                answer_text = event["answer"]
+            yield f"event: {event['type']}\ndata: {json.dumps(event)}\n\n"
+        sessions.append(session_id, "user", req.question)
+        sessions.append(session_id, "assistant", answer_text)
+
+    return StreamingResponse(
+        event_stream(), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 @app.delete("/chat/{session_id}")
-def reset_chat(session_id: str):
-    with _sessions_lock:
-        _sessions.pop(session_id, None)
+def reset_chat(session_id: str, caller: str = Depends(require_caller)):
+    _state["sessions"].clear(session_id)
     return {"status": "cleared", "session_id": session_id}

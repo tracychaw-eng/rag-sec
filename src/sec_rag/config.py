@@ -67,10 +67,23 @@ class Settings(BaseSettings):
     openai_timeout_s: float = 60.0
     openai_max_retries: int = 4
 
-    # --- Caching (in-process; CacheBackend protocol is the Redis seam) ---
+    # --- Caching / sessions (in-process by default; set SECRAG_REDIS_URL
+    #     to back caches and chat sessions with Redis — required for
+    #     multi-replica deployments) ---
     cache_max_items: int = 2048
     cache_ttl_s: float = 3600.0
     enable_answer_cache: bool = True
+    redis_url: str | None = None
+
+    # --- API security ---
+    # Comma-separated API keys. Empty = auth disabled (local dev only);
+    # the server logs a warning at startup in that case.
+    api_keys: str = ""
+    rate_limit_per_minute: int = 60
+
+    @property
+    def api_key_set(self) -> frozenset[str]:
+        return frozenset(k.strip() for k in self.api_keys.split(",") if k.strip())
 
     # --- Observability ---
     langfuse_public_key: str | None = Field(

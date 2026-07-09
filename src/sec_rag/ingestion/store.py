@@ -5,7 +5,6 @@ DB). Children are duplicated: text+metadata here (BM25 + inspection),
 vectors in Qdrant with the chunk id in the payload.
 """
 
-import json
 from pathlib import Path
 
 from ..models import ChildChunk, ParentChunk

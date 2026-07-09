@@ -3,12 +3,17 @@
 Design targets from the baseline eval:
   - answer_relevancy 0.574 with 0.0 on hedging answers → answer the question
     directly first, no adjacent-topic padding, hedge only when truly absent
+  - RAGAS's noncommittal classifier zeroes conditional risk-factor prose
+    (even human reference answers) → open with an affirmative enumerating
+    sentence
   - faithfulness gaps on reasoning → separate Evidence from Inference
   - citation discipline: every claim cites [TICKER, Item X] so grounding is
     checkable by humans, judges, and (later) an automated citation validator
 """
 
-from openai import OpenAI
+from typing import AsyncIterator
+
+from openai import AsyncOpenAI
 
 from ..config import Settings
 from ..models import ContextBlock, QueryPlan
@@ -60,6 +65,8 @@ Structure your answer:
 3. Key differences and similarities.
 Use only the provided context. Answer only what is asked."""
 
+ABSTAIN_TEXT = "This information is not available in the provided documents."
+
 
 def _format_context(contexts: list[ContextBlock], group_by_ticker: bool) -> str:
     if not group_by_ticker:
@@ -76,33 +83,56 @@ def _format_context(contexts: list[ContextBlock], group_by_ticker: bool) -> str:
 
 
 class Generator:
-    def __init__(self, cfg: Settings, openai_client: OpenAI | None = None):
+    def __init__(self, cfg: Settings, openai_client: AsyncOpenAI | None = None):
         self.cfg = cfg
-        self.openai = openai_client or OpenAI(api_key=cfg.openai_api_key)
+        self.openai = openai_client or AsyncOpenAI(api_key=cfg.openai_api_key)
 
-    def generate(self, question: str, plan: QueryPlan,
-                 contexts: list[ContextBlock]) -> str:
-        if not contexts:
-            return "This information is not available in the provided documents."
-
+    def _messages(self, question: str, plan: QueryPlan,
+                  contexts: list[ContextBlock]) -> list[dict]:
         system = {
             "factual": FACTUAL_SYSTEM,
             "reasoning": REASONING_SYSTEM,
             "comparison": COMPARISON_SYSTEM,
         }[plan.intent]
-
         context_str = _format_context(
             contexts, group_by_ticker=(plan.intent == "comparison"))
+        return [
+            {"role": "system", "content": system},
+            {"role": "user",
+             "content": f"Context:\n{context_str}\n\nQuestion: {question}"},
+        ]
 
-        resp = self.openai.chat.completions.create(
+    async def generate(self, question: str, plan: QueryPlan,
+                       contexts: list[ContextBlock]) -> str:
+        if not contexts:
+            return ABSTAIN_TEXT
+        resp = await self.openai.chat.completions.create(
             model=self.cfg.llm_model,
             temperature=self.cfg.temperature,
             max_tokens=self.cfg.max_answer_tokens,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user",
-                 "content": f"Context:\n{context_str}\n\nQuestion: {question}"},
-            ],
+            messages=self._messages(question, plan, contexts),
         )
         tracing.record_llm(self.cfg.llm_model, resp.usage, kind="generate")
         return resp.choices[0].message.content.strip()
+
+    async def stream(self, question: str, plan: QueryPlan,
+                     contexts: list[ContextBlock]) -> AsyncIterator[str]:
+        """Yields text deltas. Usage is reported from the final stream chunk
+        (stream_options.include_usage), so cost metering matches generate()."""
+        if not contexts:
+            yield ABSTAIN_TEXT
+            return
+        stream = await self.openai.chat.completions.create(
+            model=self.cfg.llm_model,
+            temperature=self.cfg.temperature,
+            max_tokens=self.cfg.max_answer_tokens,
+            messages=self._messages(question, plan, contexts),
+            stream=True,
+            stream_options={"include_usage": True},
+        )
+        async for chunk in stream:
+            if chunk.usage is not None:
+                tracing.record_llm(self.cfg.llm_model, chunk.usage,
+                                   kind="generate")
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content

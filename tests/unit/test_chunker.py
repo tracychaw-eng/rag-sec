@@ -1,4 +1,4 @@
-from sec_rag.ingestion.chunker import chunk_section, _ntokens
+from sec_rag.ingestion.chunker import chunk_section
 from sec_rag.models import ItemSection
 
 PROSE = ("The Company depends on third-party suppliers for fabrication. "

@@ -8,7 +8,7 @@ follow-ups become standalone queries.
 
 import json
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 from ..config import Settings
 from ..models import QueryPlan
@@ -39,15 +39,16 @@ Return ONLY the JSON object."""
 
 
 class QueryPlanner:
-    def __init__(self, cfg: Settings, openai_client: OpenAI | None = None,
+    def __init__(self, cfg: Settings, openai_client: AsyncOpenAI | None = None,
                  known_tickers: dict[str, str] | None = None):
         self.cfg = cfg
-        self.openai = openai_client or OpenAI(api_key=cfg.openai_api_key)
+        self.openai = openai_client or AsyncOpenAI(api_key=cfg.openai_api_key)
         self.known_tickers = known_tickers or {
             "MSFT": "Microsoft", "NVDA": "NVIDIA", "JPM": "JPMorgan Chase",
         }
 
-    def plan(self, question: str, history: list[dict] | None = None) -> QueryPlan:
+    async def plan(self, question: str,
+                   history: list[dict] | None = None) -> QueryPlan:
         ticker_list = "\n".join(f"  {t}: {n}" for t, n in self.known_tickers.items())
         messages = [
             {"role": "system",
@@ -59,7 +60,7 @@ class QueryPlanner:
                              "content": f"Conversation so far:\n{convo}"})
         messages.append({"role": "user", "content": f"Question: {question}"})
 
-        resp = self.openai.chat.completions.create(
+        resp = await self.openai.chat.completions.create(
             model=self.cfg.planner_model,
             messages=messages,
             response_format={"type": "json_object"},

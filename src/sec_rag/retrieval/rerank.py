@@ -1,5 +1,5 @@
-"""Cross-encoder reranking via Cohere, behind a small interface so a
-self-hosted BGE reranker can slot in later without touching callers.
+"""Cross-encoder reranking via Cohere (async), behind a small interface so
+a self-hosted BGE reranker can slot in later without touching callers.
 
 Retries: tenacity with exponential backoff + jitter on rate limits and
 transient server errors. If retries are exhausted, callers get the
@@ -22,19 +22,19 @@ _RETRYABLE = (
 
 class CohereReranker:
     def __init__(self, api_key: str, model: str = "rerank-english-v3.0"):
-        self._client = cohere.Client(api_key=api_key)
+        self._client = cohere.AsyncClient(api_key=api_key)
         self.model = model
 
     @retry(retry=retry_if_exception_type(_RETRYABLE),
            wait=wait_random_exponential(multiplier=2, max=30),
            stop=stop_after_attempt(4), reraise=True)
-    def _call(self, query: str, docs: list[str], top_n: int):
-        return self._client.rerank(
+    async def _call(self, query: str, docs: list[str], top_n: int):
+        return await self._client.rerank(
             model=self.model, query=query, documents=docs, top_n=top_n)
 
-    def rerank(self, query: str, candidates: list[ScoredChild],
-               top_n: int, score_floor: float = 0.0,
-               min_keep: int = 0) -> list[ScoredChild]:
+    async def rerank(self, query: str, candidates: list[ScoredChild],
+                     top_n: int, score_floor: float = 0.0,
+                     min_keep: int = 0) -> list[ScoredChild]:
         """Keep top_n by cross-encoder score. The floor trims tail noise but
         never cuts below min_keep results — absolute reranker scores vary
         too much by query phrasing to be trusted as a hard gate (measured:
@@ -42,7 +42,8 @@ class CohereReranker:
         if not candidates:
             return []
         try:
-            resp = self._call(query, [c.chunk.text for c in candidates], top_n)
+            resp = await self._call(
+                query, [c.chunk.text for c in candidates], top_n)
             tracing.record_rerank(1)
         except Exception as e:
             print(f"    reranker unavailable ({type(e).__name__}) — "
