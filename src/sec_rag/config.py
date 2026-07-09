@@ -1,0 +1,67 @@
+"""Central configuration — single source of truth for every tunable.
+
+All values can be overridden via environment variables with the SECRAG_
+prefix (e.g. SECRAG_RERANK_TOP_N=8) or a local .env file. API keys use
+their conventional unprefixed names.
+"""
+
+from pathlib import Path
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="SECRAG_",
+        env_file=".env",
+        extra="ignore",
+    )
+
+    # --- API keys (conventional env names, no prefix) ---
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY")
+    cohere_api_key: str = Field(validation_alias="COHERE_API_KEY")
+
+    # --- Models ---
+    llm_model: str = "gpt-4o-mini"
+    planner_model: str = "gpt-4o-mini"
+    embed_model: str = "text-embedding-3-small"
+    embed_dim: int = 1536
+    rerank_model: str = "rerank-english-v3.0"
+
+    # --- Paths / storage ---
+    filings_dir: Path = Path("data/filings")
+    store_dir: Path = Path("data/store")          # parent/child chunk JSONL
+    qdrant_path: Path = Path("qdrant_db")          # embedded Qdrant (local mode)
+    # Collection name carries the embedding model + schema version so an
+    # embedding-model change can never silently mix vector spaces.
+    collection: str = "sec10k_children_3small_v3"
+
+    # --- Chunking ---
+    child_tokens: int = 300
+    child_overlap_tokens: int = 60
+    parent_tokens: int = 1500
+    min_section_chars: int = 1500   # segments shorter than this = TOC noise
+
+    # --- Retrieval ---
+    dense_top_k: int = 50
+    bm25_top_k: int = 50
+    rrf_k: int = 60
+    rerank_candidates: int = 30
+    rerank_top_n: int = 8           # children kept after rerank (precise mode)
+    rerank_score_floor: float = 0.30
+    rerank_min_keep: int = 4        # floor never cuts below this many
+    reasoning_top_children: int = 12  # reasoning mode: no reranker (see README
+                                      # lesson: rerankers penalize indirect
+                                      # evidence needed for inference)
+    reasoning_parents_per_ticker: int = 3  # multi-company reasoning fan-out
+    per_ticker_top_n: int = 5       # comparison mode: children per ticker
+    max_parents: int = 6            # context budget: parents passed to the LLM
+
+    # --- Generation ---
+    temperature: float = 0.0
+    max_answer_tokens: int = 1024
+
+
+def get_settings() -> Settings:
+    return Settings()

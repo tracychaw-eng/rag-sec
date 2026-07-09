@@ -12,11 +12,15 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 from pinecone import Pinecone
 
-# ─── Step 1: Configure embedding model ────────────────────────────────────────
+# ─── Step 1: Configure embedding model + LLM ─────────────────────────────────
 Settings.embed_model = OpenAIEmbedding(
     model="text-embedding-3-small",
     api_key=os.environ.get("OPENAI_API_KEY")
 )
+# Set the LLM explicitly — previously unset, silently falling back to the
+# LlamaIndex default (lesson #6 in README: never trust silent defaults).
+from llama_index.llms.openai import OpenAI as LlamaIndexOpenAI
+Settings.llm = LlamaIndexOpenAI(model="gpt-4o-mini")
 
 # ─── Step 2: Connect to Pinecone ──────────────────────────────────────────────
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
@@ -112,11 +116,12 @@ reasoning_query_engine = index.as_query_engine(
 )
 
 # Per-source engine factory — comparison questions + R005
-# Confirmed metadata key: 'file_name' (top-level field in Pinecone)
-# top_k=8: ~42 chunks per file; 8 gives ~19% coverage per file
-def make_filtered_engine(file_name: str):
+# Filters on the stable 'ticker' metadata key. The old 'file_name' filter
+# broke silently when legacy text-file vectors (msft_10k.txt etc.) were
+# cleaned up and replaced by full-10-K vectors (MSFT_10K_2025-07-30 etc.).
+def make_filtered_engine(ticker: str):
     filters = MetadataFilters(
-        filters=[ExactMatchFilter(key="file_name", value=file_name)]
+        filters=[ExactMatchFilter(key="ticker", value=ticker)]
     )
     return index.as_query_engine(
         similarity_top_k=8,
@@ -142,17 +147,17 @@ synthesis_engine = index.as_query_engine(
 #   but with LlamaIndex managing the decomposition automatically.
 sub_question_tools = [
     QueryEngineTool.from_defaults(
-        query_engine=make_filtered_engine("msft_10k.txt"),
+        query_engine=make_filtered_engine("MSFT"),
         name="microsoft",
         description="Risk factors and disclosures from Microsoft's 10-K filing"
     ),
     QueryEngineTool.from_defaults(
-        query_engine=make_filtered_engine("nvda_10k.txt"),
+        query_engine=make_filtered_engine("NVDA"),
         name="nvidia",
         description="Risk factors and disclosures from Nvidia's 10-K filing"
     ),
     QueryEngineTool.from_defaults(
-        query_engine=make_filtered_engine("jpm_10k.txt"),
+        query_engine=make_filtered_engine("JPM"),
         name="jpmorgan",
         description="Risk factors and disclosures from JPMorgan Chase's 10-K filing"
     ),
@@ -174,12 +179,16 @@ def comparison_query(question: str, sources: list) -> dict:
     """
     per_source_answers = {}
     all_chunk_texts    = []
+    retrieved_tickers  = []
 
     for source in sources:
         engine   = make_filtered_engine(source)
         response = engine.query(question)
         per_source_answers[source] = str(response)
         all_chunk_texts.append(str(response))
+        retrieved_tickers.extend(
+            n.metadata.get("ticker", "unknown") for n in response.source_nodes
+        )
         print(f"    [{source}] {str(response)[:100]}...")
 
     combined_context = "\n\n".join([
@@ -196,6 +205,7 @@ def comparison_query(question: str, sources: list) -> dict:
         "per_source_answers": per_source_answers,
         "synthesized_answer": str(synthesized),
         "chunk_texts":        all_chunk_texts,
+        "retrieved_tickers":  retrieved_tickers,
     }
 
 # ─── Step 6: Load evaluation dataset ──────────────────────────────────────────
@@ -214,19 +224,34 @@ print("  comparison           → per-source ExactMatchFilter + synthesis\n")
 
 # ─── Step 7: Source maps ──────────────────────────────────────────────────────
 
-# Comparison question source files
+# Comparison question sources — ticker-based (matches current index metadata)
 COMPARISON_SOURCES = {
-    "C001": ["msft_10k.txt", "jpm_10k.txt"],
-    "C002": ["msft_10k.txt", "nvda_10k.txt"],
-    "C003": ["msft_10k.txt", "nvda_10k.txt", "jpm_10k.txt"],
-    "C004": ["msft_10k.txt", "jpm_10k.txt"],
-    "C005": ["nvda_10k.txt", "jpm_10k.txt"],
+    "C001": ["MSFT", "JPM"],
+    "C002": ["MSFT", "NVDA"],
+    "C003": ["MSFT", "NVDA", "JPM"],
+    "C004": ["MSFT", "JPM"],
+    "C005": ["NVDA", "JPM"],
 }
 
 # R005 routed through per-source to prevent cross-doc hallucination
 # Previously: LLM retrieved Microsoft chunks alongside Nvidia and attributed
 # "Xbox consoles and Surface devices" to Nvidia — confirmed hallucination.
-COMPARISON_SOURCES["R005"] = ["nvda_10k.txt", "msft_10k.txt", "jpm_10k.txt"]
+COMPARISON_SOURCES["R005"] = ["NVDA", "MSFT", "JPM"]
+
+# Gold source mapping: dataset still uses legacy file names
+LEGACY_SOURCE_TO_TICKER = {
+    "msft_10k.txt": "MSFT",
+    "nvda_10k.txt": "NVDA",
+    "jpm_10k.txt":  "JPM",
+}
+
+def expected_tickers_for(item: dict) -> list:
+    """Gold tickers for a question, from the dataset's source_file field."""
+    sf = item.get("source_file", "")
+    if not sf or sf == "none":
+        return []
+    return [LEGACY_SOURCE_TO_TICKER.get(s.strip(), s.strip().upper())
+            for s in sf.split(",")]
 
 # R002: SubQuestionQueryEngine (HyDE confirmed insufficient — recall=0.0)
 SUBQUESTION_IDS = {"R002"}
@@ -265,6 +290,12 @@ for item in questions:
         unique_sources = sources
         all_sources    = sources
         chunk_texts    = comp["chunk_texts"]
+        retrieved_tickers = comp["retrieved_tickers"]
+        # Generation context = the per-source answers the synthesizer saw
+        generation_contexts = [
+            f"[Source: {src}] {ans}"
+            for src, ans in comp["per_source_answers"].items()
+        ]
         extra_fields   = {
             "engine_used":        "per-source",
             "per_source_answers": comp["per_source_answers"],
@@ -280,6 +311,10 @@ for item in questions:
         all_sources    = [n.metadata.get("file_name", "unknown")
                           for n in response.source_nodes]
         chunk_texts    = [n.text for n in response.source_nodes]
+        retrieved_tickers = [n.metadata.get("ticker", "unknown")
+                             for n in response.source_nodes]
+        generation_contexts = [f"[Source: {t}] {text}"
+                               for t, text in zip(retrieved_tickers, chunk_texts)]
         unique_sources = list(dict.fromkeys(all_sources))
         raw_score = response.source_nodes[0].score if response.source_nodes else None
         top_score = raw_score if raw_score is not None else 0.0
@@ -292,6 +327,10 @@ for item in questions:
         all_sources    = [n.metadata.get("file_name", "unknown")
                           for n in response.source_nodes]
         chunk_texts    = [n.text for n in response.source_nodes]
+        retrieved_tickers = [n.metadata.get("ticker", "unknown")
+                             for n in response.source_nodes]
+        generation_contexts = [f"[Source: {t}] {text}"
+                               for t, text in zip(retrieved_tickers, chunk_texts)]
         unique_sources = list(dict.fromkeys(all_sources))
         raw_score = response.source_nodes[0].score if response.source_nodes else None
         top_score = raw_score if raw_score is not None else 0.0
@@ -304,6 +343,10 @@ for item in questions:
         all_sources    = [n.metadata.get("file_name", "unknown")
                           for n in response.source_nodes]
         chunk_texts    = [n.text for n in response.source_nodes]
+        retrieved_tickers = [n.metadata.get("ticker", "unknown")
+                             for n in response.source_nodes]
+        generation_contexts = [f"[Source: {t}] {text}"
+                               for t, text in zip(retrieved_tickers, chunk_texts)]
         unique_sources = list(dict.fromkeys(all_sources))
         raw_score = response.source_nodes[0].score if response.source_nodes else None
         top_score = raw_score if raw_score is not None else 0.0
@@ -321,6 +364,9 @@ for item in questions:
         "unique_sources":    unique_sources,
         "source_diversity":  len(unique_sources),
         "chunk_texts":       chunk_texts,
+        "retrieved_tickers": retrieved_tickers,
+        "expected_tickers":  expected_tickers_for(item),
+        "generation_contexts": generation_contexts,
         **extra_fields
     }
 
@@ -361,7 +407,7 @@ for item in questions:
         print("Diversity check: ✅ MULTI-SOURCE")
 
     if qid == "R002":
-        has_jpm = "jpm_10k.txt" in unique_sources
+        has_jpm = "JPM" in retrieved_tickers
         print(f"SubQuestion diagnostic: "
               f"{'✅ JPMorgan retrieved' if has_jpm else '❌ JPMorgan still missing'}")
         print(f"  Sources: {unique_sources}")
@@ -374,158 +420,15 @@ with open("eval_results.json", "w") as f:
     json.dump(results, f, indent=2)
 print("Results saved to eval_results.json\n")
 
-# ─── Step 10: RAGAS evaluation ────────────────────────────────────────────────
-# Applied to factual + reasoning only.
-# answer_relevancy fix: use RagasOpenAIEmbeddings directly instead of
-# embedding_factory, which was silently failing to attach embeddings
-# to the metric — causing null scores on all questions.
+# ─── Step 10: Metrics ───
+# Retrieval Recall@K/Precision@K + RAGAS now live in eval/harness.py
+# (pipeline-agnostic), so the same harness scores this legacy pipeline
+# and the new sec_rag pipeline for a like-for-like comparison.
 try:
-    from ragas import evaluate as ragas_evaluate
-    from ragas.metrics import (          # ← correct path
-        Faithfulness, 
-        AnswerRelevancy, 
-        ContextRecall, 
-        ContextPrecision
-    )
-    from ragas.llms import LangchainLLMWrapper
-    from ragas.embeddings import LangchainEmbeddingsWrapper
-    from langchain_openai import ChatOpenAI, OpenAIEmbeddings as LCOpenAIEmbeddings
-    from openai import OpenAI
-    from datasets import Dataset
-
-    print("=" * 60)
-    print("RAGAS EVALUATION")
-    print("=" * 60)
-
-    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
-    ragas_llm = LangchainLLMWrapper(
-        ChatOpenAI(model="gpt-4o-mini", api_key=os.environ.get("OPENAI_API_KEY"))
-    )
-    ragas_embeddings = LangchainEmbeddingsWrapper(
-        LCOpenAIEmbeddings(model="text-embedding-3-small", api_key=os.environ.get("OPENAI_API_KEY"))
-    )
-
-
-
-    f  = Faithfulness(llm=ragas_llm)
-    ar = AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings)
-    cr = ContextRecall(llm=ragas_llm)
-    cp = ContextPrecision(llm=ragas_llm)
-    metrics = [f, ar, cr, cp]
-
-# Verify before passing to evaluate — should print class names not module names
-    print("Metric types:", [type(m).__name__ for m in metrics])
-
-    # Factual + reasoning only
-    # adversarial  → "NOT IN DOCUMENTS" is not a valid ground truth
-    # comparison   → per-source answer text is a proxy, not raw chunks
-    ragas_items = [
-        r for r in results
-        if r["category"] in ("factual", "reasoning")
-        and r["reference_answer"] != "NOT IN DOCUMENTS"
-        and r.get("chunk_texts")
-    ]
-
-    print(f"Running RAGAS on {len(ragas_items)} questions "
-          f"(factual + reasoning only)")
-    print("LLM-as-judge: gpt-4o-mini | Embeddings: text-embedding-3-small\n")
-
-    ragas_data = {
-        "question":     [r["question"] for r in ragas_items],
-        "answer":       [r["system_answer"] for r in ragas_items],
-        # Truncate to 1000 chars to prevent token limit failures
-        # F001 and F004 recall=0.000
-        # These are retrieval failures caused by 1000-char chunk truncation in RAGAS contexts. 
-        "contexts":     [
-            [
-                f"[Source: {src}] {text}"
-                for src, text in zip(r["sources_retrieved"], r["chunk_texts"])
-            ]
-            for r in ragas_items
-        ],
-        "ground_truth": [r["reference_answer"] for r in ragas_items],
-    }
-
-    dataset = Dataset.from_dict(ragas_data)
-    ragas_result = ragas_evaluate(dataset, metrics=metrics)
-    print(ragas_result)
-
-    ragas_df = ragas_result.to_pandas()
-
-    # Per-question table
-    print(f"\n  {'ID':<6} {'Cat':<10} {'Engine':<12} {'Faithful':<10} "
-          f"{'Relevancy':<12} {'Recall':<10} {'Precision'}")
-    print(f"  {'-'*72}")
-    for i, r in enumerate(ragas_items):
-        row        = ragas_df.iloc[i]
-        engine_tag = r.get("engine_used", "rerank")[:10]
-        print(
-            f"  {r['id']:<6} "
-            f"{r['category']:<10} "
-            f"{engine_tag:<12} "
-            f"{row.get('faithfulness', 0) or 0:<10.3f} "
-            f"{row.get('answer_relevancy', 0) or 0:<12.3f} "
-            f"{row.get('context_recall', 0) or 0:<10.3f} "
-            f"{row.get('context_precision', 0) or 0:.3f}"
-        )
-
-    # Category averages
-    print(f"\n  {'Category':<12} {'Faithful':<10} {'Relevancy':<12} "
-          f"{'Recall':<10} {'Precision'}")
-    print(f"  {'-'*52}")
-    for cat in ("factual", "reasoning"):
-        idx = [i for i, r in enumerate(ragas_items) if r["category"] == cat]
-        if not idx:
-            continue
-        cat_rows = ragas_df.iloc[idx]
-        def safe_mean(col):
-            vals = [v for v in cat_rows[col] if v is not None]
-            return sum(vals) / len(vals) if vals else 0.0
-        print(
-            f"  {cat:<12} "
-            f"{safe_mean('faithfulness'):<10.3f} "
-            f"{safe_mean('answer_relevancy'):<12.3f} "
-            f"{safe_mean('context_recall'):<10.3f} "
-            f"{safe_mean('context_precision'):.3f}"
-        )
-
-    ragas_df.to_json("ragas_results.json", orient="records", indent=2)
-    print("\nRAGAS results saved to ragas_results.json")
-
-    # R002 SubQuestion check via RAGAS
-    r002_idx = next(
-        (i for i, r in enumerate(ragas_items) if r["id"] == "R002"), None
-    )
-    if r002_idx is not None:
-        r002_row = ragas_df.iloc[r002_idx]
-        recall = r002_row.get("context_recall", 0) or 0
-        print(f"\nR002 SubQuestion result:")
-        print(f"  context_recall = {recall:.3f}  "
-              f"{'✅ improved from 0.0' if recall > 0 else '❌ still 0.0'}")
-        if recall == 0:
-            print("  Next step: manually add JPMorgan CCP/clearing chunks "
-                  "to the index or rewrite the reference answer to reflect "
-                  "what the retriever CAN find.")
-
-    print("""
-  INTERPRETING RAGAS SCORES
-  ─────────────────────────
-  faithfulness:      > 0.8 good | < 0.5 LLM hallucinating beyond chunks
-  answer_relevancy:  > 0.8 good | < 0.5 answer doesn't address question
-  context_recall:    > 0.7 good | < 0.4 retrieval missed needed chunks
-  context_precision: > 0.7 good | < 0.4 too much noise in retrieved chunks
-
-  faithfulness < 1.0 on reasoning questions is expected — inference
-  requires connecting dots not explicitly stated in any single chunk.
-    """)
-
-except ImportError as e:
-    print(f"Missing package — skipping RAGAS: {e}")
-    print("To enable: pip install ragas datasets\n")
-
+    from eval.harness import evaluate_results
+    evaluate_results(results, label="baseline-legacy-fullcorpus", with_ragas=True)
 except Exception as e:
-    print(f"RAGAS evaluation failed: {e}")
+    print(f"Metrics evaluation failed: {e}")
     print("Continuing to summary...\n")
 
 # ─── Step 11: Summary ─────────────────────────────────────────────────────────
@@ -568,7 +471,7 @@ for cat in ["factual", "reasoning", "comparison", "adversarial"]:
         if cat == "adversarial":
             notes = "✅" if r.get("correctly_abstained") else "⚠️ HALLUCINATION"
         if r["id"] == "R002":
-            has_jpm = "jpm_10k.txt" in r["unique_sources"]
+            has_jpm = "JPM" in r.get("retrieved_tickers", [])
             notes = "✅ JPMorgan retrieved" if has_jpm else "❌ JPMorgan missing"
         if r["id"] == "R005":
             notes = "per-source (hallucination fix)"

@@ -1,0 +1,234 @@
+{
+  "label": "secrag-v2",
+  "date": "2026-07-08",
+  "n_questions": 20,
+  "retrieval": {
+    "factual": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 5
+    },
+    "reasoning": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.466,
+      "n": 5
+    },
+    "comparison": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 5
+    },
+    "overall": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.822,
+      "n": 15
+    }
+  },
+  "retrieval_per_question": {
+    "F001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 3,
+      "missing_tickers": []
+    },
+    "F002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "F005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 2,
+      "missing_tickers": []
+    },
+    "R001": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R002": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "R004": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R005": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "C001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "C002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "C003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 7,
+      "missing_tickers": []
+    },
+    "C004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "C005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "A001": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A002": {
+      "recall": null,
+      "precision": null,
+      "k": 2
+    },
+    "A003": {
+      "recall": null,
+      "precision": null,
+      "k": 3
+    },
+    "A004": {
+      "recall": null,
+      "precision": null,
+      "k": 2
+    },
+    "A005": {
+      "recall": null,
+      "precision": null,
+      "k": 4
+    }
+  },
+  "abstention": {
+    "A001": false,
+    "A002": false,
+    "A003": true,
+    "A004": false,
+    "A005": true
+  },
+  "abstention_note": "Corpus is now full 10-Ks: several adversarial answers (revenue, headcount, CEO) ARE in the documents. Abstention gold labels are stale \u2014 dataset revision needed before trusting this category.",
+  "ragas": {
+    "overall": {
+      "faithfulness": 0.915,
+      "answer_relevancy": 0.791,
+      "context_recall": 0.9,
+      "context_precision": 0.845
+    },
+    "factual": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.735,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "reasoning": {
+      "faithfulness": 0.829,
+      "answer_relevancy": 0.847,
+      "context_recall": 0.8,
+      "context_precision": 0.69
+    }
+  },
+  "ragas_per_question": {
+    "F001": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F002": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.986,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F003": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F004": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.886,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.81,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R001": {
+      "faithfulness": 0.833,
+      "answer_relevancy": 0.809,
+      "context_recall": 1.0,
+      "context_precision": 0.242
+    },
+    "R002": {
+      "faithfulness": 0.625,
+      "answer_relevancy": 0.688,
+      "context_recall": 0.667,
+      "context_precision": 1.0
+    },
+    "R003": {
+      "faithfulness": 0.889,
+      "answer_relevancy": 0.965,
+      "context_recall": 0.667,
+      "context_precision": 1.0
+    },
+    "R004": {
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.925,
+      "context_recall": 0.667,
+      "context_precision": 0.242
+    },
+    "R005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.849,
+      "context_recall": 1.0,
+      "context_precision": 0.967
+    }
+  }
+}

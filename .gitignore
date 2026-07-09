@@ -4,3 +4,9 @@ __pycache__/
 .env
 chroma_db/
 data/
+qdrant_db/
+*.egg-info/
+.pytest_cache/
+eval/*.log
+eval/results_smoke.json
+eval/metrics_smoke.json

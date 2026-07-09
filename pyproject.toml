@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sec-rag"
+version = "0.1.0"
+description = "Production RAG pipeline over SEC 10-K filings (Phase 1 redesign)"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "openai>=1.30",
+    "cohere>=5.0",
+    "qdrant-client>=1.9",
+    "rank-bm25>=0.2",
+    "beautifulsoup4>=4.12",
+    "tiktoken>=0.7",
+    "requests>=2.31",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
