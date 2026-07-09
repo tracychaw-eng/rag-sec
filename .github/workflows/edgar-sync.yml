@@ -1,0 +1,43 @@
+name: EDGAR Sync
+
+# Weekly corpus refresh: fetch the latest 10-Ks from EDGAR and ingest any
+# filing not already in the corpus (new fiscal years appear automatically).
+#
+# NOTE: this job must reach the PRODUCTION index and chunk store to be
+# useful. Two supported setups:
+#   1. Self-hosted runner with volume access + SECRAG_QDRANT_URL secret
+#   2. Hosted runner + network-reachable Qdrant (SECRAG_QDRANT_URL) +
+#      committing/uploading the chunk store artifact for deploys
+# Without SECRAG_QDRANT_URL it exercises the sync path against an
+# ephemeral embedded index (dry-run value only).
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Latest N 10-Ks per ticker"
+        default: "2"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      SECRAG_QDRANT_URL: ${{ secrets.SECRAG_QDRANT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: pip install -e .
+      - name: Sync latest filings
+        run: python -m sec_rag.ingestion.sync --years ${{ github.event.inputs.years || 2 }}
+      - name: Upload chunk store artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-store-${{ github.run_id }}
+          path: data/store/

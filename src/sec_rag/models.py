@@ -52,6 +52,7 @@ QueryIntent = Literal["factual", "comparison", "reasoning"]
 class QueryPlan(BaseModel):
     intent: QueryIntent = "factual"
     tickers: list[str] = Field(default_factory=list)  # [] = no restriction
+    years: list[int] = Field(default_factory=list)    # filing years, [] = all
     rewritten_query: str
     paraphrases: list[str] = Field(default_factory=list)
     reason: str = ""             # planner's one-line justification (for traces)

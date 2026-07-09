@@ -32,13 +32,18 @@ class BM25Index:
         self._bm25 = BM25Okapi([tokenize(c.text) for c in children])
 
     def search(self, query: str, top_k: int = 50,
-               tickers: list[str] | None = None) -> list[tuple[ChildChunk, float]]:
+               tickers: list[str] | None = None,
+               years: list[int] | None = None
+               ) -> list[tuple[ChildChunk, float]]:
         scores = self._bm25.get_scores(tokenize(query))
         allowed = set(t.upper() for t in tickers) if tickers else None
+        year_set = set(years) if years else None
         ranked = sorted(
             (
                 (c, float(s)) for c, s in zip(self.children, scores)
-                if s > 0 and (allowed is None or c.ticker in allowed)
+                if s > 0
+                and (allowed is None or c.ticker in allowed)
+                and (year_set is None or int(c.filing_date[:4]) in year_set)
             ),
             key=lambda x: x[1], reverse=True,
         )

@@ -36,7 +36,9 @@ class HybridRetriever:
                  embed_cache: CacheBackend | None = None):
         self.cfg = cfg
         self.store = store or ChunkStore(cfg.store_dir)
-        self.qdrant = qdrant or AsyncQdrantClient(path=str(cfg.qdrant_path))
+        self.qdrant = qdrant or (
+            AsyncQdrantClient(url=cfg.qdrant_url) if cfg.qdrant_url
+            else AsyncQdrantClient(path=str(cfg.qdrant_path)))
         self.openai = openai_client or AsyncOpenAI(api_key=cfg.openai_api_key)
         self.reranker = reranker or CohereReranker(
             api_key=cfg.cohere_api_key, model=cfg.rerank_model)
@@ -64,12 +66,18 @@ class HybridRetriever:
         return vec
 
     async def _dense_search(self, query: str, top_k: int,
-                            tickers: list[str] | None) -> list[str]:
+                            tickers: list[str] | None,
+                            years: list[int] | None = None) -> list[str]:
         """Returns child chunk ids in rank order."""
-        flt = None
+        must = []
         if tickers:
-            flt = qm.Filter(must=[qm.FieldCondition(
-                key="ticker", match=qm.MatchAny(any=[t.upper() for t in tickers]))])
+            must.append(qm.FieldCondition(
+                key="ticker",
+                match=qm.MatchAny(any=[t.upper() for t in tickers])))
+        if years:
+            must.append(qm.FieldCondition(
+                key="filing_year", match=qm.MatchAny(any=years)))
+        flt = qm.Filter(must=must) if must else None
         hits = (await self.qdrant.query_points(
             collection_name=self.cfg.collection,
             query=await self._embed(query),
@@ -80,23 +88,26 @@ class HybridRetriever:
         return [h.payload["chunk_id"] for h in hits]
 
     def _bm25_search(self, query: str, top_k: int,
-                     tickers: list[str] | None) -> list[str]:
-        return [c.id for c, _ in self.bm25.search(query, top_k, tickers)]
+                     tickers: list[str] | None,
+                     years: list[int] | None = None) -> list[str]:
+        return [c.id for c, _ in self.bm25.search(query, top_k, tickers, years)]
 
     # ------------------------------------------------------------------
     async def retrieve_children(self, queries: list[str],
-                                tickers: list[str] | None = None
+                                tickers: list[str] | None = None,
+                                years: list[int] | None = None
                                 ) -> list[ScoredChild]:
         """Hybrid retrieval for one or more query phrasings (multi-query),
         fused with RRF. Dense searches for all phrasings run concurrently."""
         dense_lists = await asyncio.gather(*[
-            self._dense_search(q, self.cfg.dense_top_k, tickers)
+            self._dense_search(q, self.cfg.dense_top_k, tickers, years)
             for q in queries
         ])
         rankings = []
         for q, dense in zip(queries, dense_lists):
             rankings.append(dense)
-            rankings.append(self._bm25_search(q, self.cfg.bm25_top_k, tickers))
+            rankings.append(
+                self._bm25_search(q, self.cfg.bm25_top_k, tickers, years))
 
         fused = rrf(rankings, k=self.cfg.rrf_k)
         ordered = sorted(fused.items(), key=lambda x: x[1], reverse=True)
@@ -127,8 +138,9 @@ class HybridRetriever:
 
     # ------------------------------------------------------------------
     async def retrieve(self, queries: list[str], mode: str = "precise",
-                       tickers: list[str] | None = None) -> list[ContextBlock]:
-        candidates = await self.retrieve_children(queries, tickers)
+                       tickers: list[str] | None = None,
+                       years: list[int] | None = None) -> list[ContextBlock]:
+        candidates = await self.retrieve_children(queries, tickers, years)
 
         if mode == "precise":
             kept = await self.reranker.rerank(

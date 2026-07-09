@@ -88,12 +88,15 @@ class Generator:
         self.openai = openai_client or AsyncOpenAI(api_key=cfg.openai_api_key)
 
     def _messages(self, question: str, plan: QueryPlan,
-                  contexts: list[ContextBlock]) -> list[dict]:
+                  contexts: list[ContextBlock],
+                  user_context: str | None = None) -> list[dict]:
         system = {
             "factual": FACTUAL_SYSTEM,
             "reasoning": REASONING_SYSTEM,
             "comparison": COMPARISON_SYSTEM,
         }[plan.intent]
+        if user_context:
+            system = f"{system}\n\n{user_context}"
         context_str = _format_context(
             contexts, group_by_ticker=(plan.intent == "comparison"))
         return [
@@ -103,20 +106,22 @@ class Generator:
         ]
 
     async def generate(self, question: str, plan: QueryPlan,
-                       contexts: list[ContextBlock]) -> str:
+                       contexts: list[ContextBlock],
+                       user_context: str | None = None) -> str:
         if not contexts:
             return ABSTAIN_TEXT
         resp = await self.openai.chat.completions.create(
             model=self.cfg.llm_model,
             temperature=self.cfg.temperature,
             max_tokens=self.cfg.max_answer_tokens,
-            messages=self._messages(question, plan, contexts),
+            messages=self._messages(question, plan, contexts, user_context),
         )
         tracing.record_llm(self.cfg.llm_model, resp.usage, kind="generate")
         return resp.choices[0].message.content.strip()
 
     async def stream(self, question: str, plan: QueryPlan,
-                     contexts: list[ContextBlock]) -> AsyncIterator[str]:
+                     contexts: list[ContextBlock],
+                     user_context: str | None = None) -> AsyncIterator[str]:
         """Yields text deltas. Usage is reported from the final stream chunk
         (stream_options.include_usage), so cost metering matches generate()."""
         if not contexts:
@@ -126,7 +131,7 @@ class Generator:
             model=self.cfg.llm_model,
             temperature=self.cfg.temperature,
             max_tokens=self.cfg.max_answer_tokens,
-            messages=self._messages(question, plan, contexts),
+            messages=self._messages(question, plan, contexts, user_context),
             stream=True,
             stream_options={"include_usage": True},
         )

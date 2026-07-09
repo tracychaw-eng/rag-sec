@@ -26,6 +26,7 @@ from .config import Settings, get_settings
 from .generation.generator import PROMPT_VERSION, Generator
 from .models import Answer, ContextBlock, QueryPlan
 from .observability import tracing
+from .observability.judge import OnlineJudge
 from .retrieval.planner import QueryPlanner
 from .retrieval.retriever import HybridRetriever
 
@@ -38,6 +39,11 @@ class RAGPipeline:
             timeout=self.cfg.openai_timeout_s,
             max_retries=self.cfg.openai_max_retries,
         )
+        self.openai = openai_client
+        self.judge = (OnlineJudge(
+            openai_client, self.cfg.llm_model,
+            self.cfg.judge_sample_rate, self.cfg.judge_log_path)
+            if self.cfg.judge_sample_rate > 0 else None)
         embed_cache = make_cache("embed", self.cfg.cache_max_items,
                                  self.cfg.cache_ttl_s, self.cfg.redis_url)
         self.planner = QueryPlanner(self.cfg, openai_client)
@@ -59,10 +65,13 @@ class RAGPipeline:
 
     # ------------------------------------------------------------------
     def _answer_cache_key(self, question: str,
-                          history: list[dict] | None) -> str | None:
-        # Single-shot questions only — follow-ups depend on conversation
-        # state. Key includes corpus + prompt versions.
-        if not self.cfg.enable_answer_cache or history:
+                          history: list[dict] | None,
+                          user_context: str | None = None) -> str | None:
+        # Cache single-shot, non-personalized questions only: follow-ups
+        # depend on conversation state, and a personalized answer must
+        # never be served to another user. Key includes corpus + prompt
+        # versions.
+        if not self.cfg.enable_answer_cache or history or user_context:
             return None
         return cache_key("answer", self.cfg.collection, PROMPT_VERSION,
                          question.strip().lower())
@@ -78,15 +87,16 @@ class RAGPipeline:
 
     # ------------------------------------------------------------------
     async def answer(self, question: str,
-                     history: list[dict] | None = None) -> Answer:
-        ans_key = self._answer_cache_key(question, history)
+                     history: list[dict] | None = None,
+                     user_context: str | None = None) -> Answer:
+        ans_key = self._answer_cache_key(question, history, user_context)
         cached = self._cached_answer(ans_key)
         if cached is not None:
             return cached
 
         with tracing.start_trace("rag.answer", question=question) as trace:
             with trace.span("plan"):
-                plan = await self.planner.plan(question, history)
+                plan = await self.planner.plan(question, history, user_context)
             queries = [plan.rewritten_query, *plan.paraphrases]
 
             with trace.span("retrieve", intent=plan.intent,
@@ -94,7 +104,8 @@ class RAGPipeline:
                 contexts, engine = await self._retrieve(plan, queries)
 
             with trace.span("generate", n_contexts=len(contexts)):
-                text = await self.generator.generate(question, plan, contexts)
+                text = await self.generator.generate(
+                    question, plan, contexts, user_context)
 
             summary = trace.summary()
             summary["engine"] = engine
@@ -105,7 +116,19 @@ class RAGPipeline:
                         contexts=contexts, engine_used=engine, trace=summary)
         if ans_key is not None:
             self.answer_cache.set(ans_key, answer.model_dump_json())
+        self._maybe_judge(answer)
         return answer
+
+    def _maybe_judge(self, answer: Answer) -> None:
+        """Fire-and-forget online faithfulness sampling."""
+        if self.judge is None or not self.judge.should_sample():
+            return
+        asyncio.create_task(self.judge.judge(
+            trace_id=(answer.trace or {}).get("trace_id", ""),
+            question=answer.question,
+            answer=answer.text,
+            contexts=answer.generation_contexts,
+        ))
 
     def answer_sync(self, question: str,
                     history: list[dict] | None = None) -> Answer:
@@ -123,13 +146,14 @@ class RAGPipeline:
 
     # ------------------------------------------------------------------
     async def answer_stream(self, question: str,
-                            history: list[dict] | None = None):
+                            history: list[dict] | None = None,
+                            user_context: str | None = None):
         """Async generator of events:
             {"type": "meta", intent, tickers, engine, cached}
             {"type": "delta", "text": ...}          (0..n)
             {"type": "done", answer, latency_ms, cost_usd, trace_id, contexts}
         """
-        ans_key = self._answer_cache_key(question, history)
+        ans_key = self._answer_cache_key(question, history, user_context)
         cached = self._cached_answer(ans_key)
         if cached is not None:
             yield {"type": "meta", "intent": cached.plan.intent,
@@ -145,7 +169,7 @@ class RAGPipeline:
         with tracing.start_trace("rag.answer_stream",
                                  question=question) as trace:
             with trace.span("plan"):
-                plan = await self.planner.plan(question, history)
+                plan = await self.planner.plan(question, history, user_context)
             queries = [plan.rewritten_query, *plan.paraphrases]
 
             with trace.span("retrieve", intent=plan.intent,
@@ -158,7 +182,7 @@ class RAGPipeline:
             parts: list[str] = []
             with trace.span("generate", n_contexts=len(contexts)):
                 async for delta in self.generator.stream(
-                        question, plan, contexts):
+                        question, plan, contexts, user_context):
                     parts.append(delta)
                     yield {"type": "delta", "text": delta}
 
@@ -172,6 +196,7 @@ class RAGPipeline:
                         contexts=contexts, engine_used=engine, trace=summary)
         if ans_key is not None:
             self.answer_cache.set(ans_key, answer.model_dump_json())
+        self._maybe_judge(answer)
 
         yield {"type": "done", "answer": text,
                "latency_ms": summary["total_ms"],
@@ -189,7 +214,7 @@ class RAGPipeline:
                        else self.retriever.store.available_tickers())
             results = await asyncio.gather(*[
                 self.retriever.retrieve(queries, mode="per_ticker",
-                                        tickers=[t])
+                                        tickers=[t], years=plan.years or None)
                 for t in tickers
             ])
             contexts = [b for blocks in results for b in blocks]
@@ -203,19 +228,22 @@ class RAGPipeline:
             if len(tickers) >= 2:
                 results = await asyncio.gather(*[
                     self.retriever.retrieve(queries, mode="reasoning",
-                                            tickers=[t])
+                                            tickers=[t],
+                                            years=plan.years or None)
                     for t in tickers
                 ])
                 cap = self.cfg.reasoning_parents_per_ticker
                 contexts = [b for blocks in results for b in blocks[:cap]]
             else:
                 contexts = await self.retriever.retrieve(
-                    queries, mode="reasoning", tickers=tickers)
+                    queries, mode="reasoning", tickers=tickers,
+                    years=plan.years or None)
             return contexts, f"reasoning({','.join(tickers)})"
 
         # factual
         contexts = await self.retriever.retrieve(
-            queries, mode="precise", tickers=plan.tickers or None)
+            queries, mode="precise", tickers=plan.tickers or None,
+            years=plan.years or None)
         return contexts, "hybrid+rerank"
 
 

@@ -48,12 +48,39 @@ ITEM_HEADING_RE = re.compile(
 )
 
 
+def _table_to_rows(table) -> str:
+    """Render an HTML table as pipe-delimited rows.
+
+    Raw get_text() scatters each cell onto its own line, destroying the
+    row structure that makes financial-statement numbers answerable
+    ("Revenue | 130,497 | 60,922"). iXBRL tables are full of empty
+    spacer cells — those are dropped per row.
+    """
+    rows = []
+    for tr in table.find_all("tr"):
+        cells = [c.get_text(" ", strip=True)
+                 for c in tr.find_all(["td", "th"])]
+        cells = [c for c in cells if c]
+        if len(cells) >= 2:
+            rows.append("| " + " | ".join(cells) + " |")
+        elif len(cells) == 1:
+            rows.append(cells[0])       # section header row inside a table
+    return "\n".join(rows)
+
+
 def html_to_text(filepath: Path) -> str:
-    """Extract clean text from a 10-K HTML filing (legacy-compatible)."""
+    """Extract clean text from a 10-K HTML filing, preserving table rows."""
     raw = filepath.read_text(encoding="utf-8", errors="replace")
     soup = BeautifulSoup(raw, "html.parser")
     for tag in soup(["script", "style", "meta", "link", "header", "footer"]):
         tag.decompose()
+
+    # Replace each table with its pipe-row rendering BEFORE get_text, so
+    # numeric rows stay intact. Nested tables: innermost first.
+    for table in reversed(soup.find_all("table")):
+        rendered = _table_to_rows(table)
+        table.replace_with("\n" + rendered + "\n" if rendered else "\n")
+
     text = soup.get_text(separator="\n")
     lines = [ln.strip() for ln in text.splitlines()]
     return "\n".join(ln for ln in lines if len(ln) > 3)

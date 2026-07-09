@@ -61,6 +61,7 @@ def upsert_children(qdrant: QdrantClient, cfg: Settings,
             payload={
                 "chunk_id": c.id, "parent_id": c.parent_id,
                 "ticker": c.ticker, "filing_date": c.filing_date,
+                "filing_year": int(c.filing_date[:4]),
                 "item": c.item,
             },
         )
@@ -93,13 +94,15 @@ def ingest_filing(filepath: Path, cfg: Settings, store: ChunkStore,
         children.extend(c)
     print(f"  parents: {len(parents)}  children: {len(children)}")
 
-    store.save(ticker, parents, children)
+    store.save(ticker, filing_date, parents, children)
 
-    # Idempotency: remove this ticker's old vectors before upserting
+    # Idempotency per FILING: re-ingesting one year never touches another
     qdrant.delete(
         collection_name=cfg.collection,
         points_selector=qm.FilterSelector(filter=qm.Filter(must=[
-            qm.FieldCondition(key="ticker", match=qm.MatchValue(value=ticker))
+            qm.FieldCondition(key="ticker", match=qm.MatchValue(value=ticker)),
+            qm.FieldCondition(key="filing_date",
+                              match=qm.MatchValue(value=filing_date)),
         ])),
     )
     vectors = _embed_batches(openai_client, cfg.embed_model,
@@ -123,7 +126,8 @@ def main():
         sys.exit(1)
 
     store = ChunkStore(cfg.store_dir)
-    qdrant = QdrantClient(path=str(cfg.qdrant_path))
+    qdrant = (QdrantClient(url=cfg.qdrant_url) if cfg.qdrant_url
+              else QdrantClient(path=str(cfg.qdrant_path)))
     openai_client = OpenAI(api_key=cfg.openai_api_key)
     ensure_collection(qdrant, cfg)
 

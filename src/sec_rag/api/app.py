@@ -14,14 +14,17 @@ Sessions and caches are in-process by default; set SECRAG_REDIS_URL to
 share them across replicas.
 """
 
+import asyncio
 import json
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from ..memory import MemoryExtractor, format_user_context, make_user_memory
 from ..observability.logs import setup_logging
 from ..pipeline import RAGPipeline
 from ..ratelimit import make_limiter
@@ -40,6 +43,10 @@ async def lifespan(app: FastAPI):
     _state["sessions"] = make_session_store(pipeline.cfg.redis_url)
     _state["limiter"] = make_limiter(pipeline.cfg.rate_limit_per_minute,
                                      pipeline.cfg.redis_url)
+    _state["user_memory"] = make_user_memory(pipeline.cfg.redis_url)
+    _state["memory_extractor"] = MemoryExtractor(
+        pipeline.openai, pipeline.cfg.llm_model, _state["user_memory"],
+        pipeline.cfg.memory_confidence_floor)
     logger.info("sec-rag api ready", extra={
         "children": len(pipeline.retriever.children_by_id),
         "auth": bool(pipeline.cfg.api_key_set),
@@ -142,10 +149,14 @@ def health():
         "status": "ok",
         "auth": "enabled" if pipeline.cfg.api_key_set else "DISABLED",
         "tickers": pipeline.retriever.store.available_tickers(),
+        "filings": [f"{t} {d}" for t, d
+                    in pipeline.retriever.store.available_filings()],
         "children_indexed": len(pipeline.retriever.children_by_id),
         "parents": len(pipeline.retriever.parents_by_id),
         "collection": pipeline.cfg.collection,
+        "qdrant": pipeline.cfg.qdrant_url or "embedded",
         "caches": pipeline.cache_stats(),
+        "judge": pipeline.judge.stats() if pipeline.judge else {"sample_rate": 0},
     }
 
 
@@ -156,37 +167,67 @@ async def query(req: QueryRequest, caller: str = Depends(require_caller)):
     return _to_response(ans)
 
 
+def _user_context_for(user_id: str | None) -> str | None:
+    if not user_id:
+        return None
+    return format_user_context(_state["user_memory"].get_facts(user_id))
+
+
+def _after_chat_turn(user_id: str | None, session_id: str,
+                     question: str, answer_text: str, intent: str,
+                     tickers: list[str]) -> None:
+    """Episodic log + fire-and-forget semantic fact extraction."""
+    if not user_id:
+        return
+    _state["user_memory"].log_event(user_id, {
+        "ts": time.time(), "session_id": session_id,
+        "question": question[:300], "intent": intent, "tickers": tickers,
+    })
+    asyncio.create_task(_state["memory_extractor"].extract(
+        user_id, session_id, question, answer_text))
+
+
 @app.post("/chat/{session_id}", response_model=QueryResponse)
 async def chat(session_id: str, req: QueryRequest,
-               caller: str = Depends(require_caller)):
+               caller: str = Depends(require_caller),
+               x_user_id: str | None = Header(default=None)):
     pipeline: RAGPipeline = _state["pipeline"]
     sessions = _state["sessions"]
     history = sessions.get(session_id)
 
-    ans = await pipeline.answer(req.question, history=history or None)
+    ans = await pipeline.answer(req.question, history=history or None,
+                                user_context=_user_context_for(x_user_id))
 
     sessions.append(session_id, "user", req.question)
     sessions.append(session_id, "assistant", ans.text)
+    _after_chat_turn(x_user_id, session_id, req.question, ans.text,
+                     ans.plan.intent, ans.plan.tickers)
     return _to_response(ans)
 
 
 @app.post("/chat/{session_id}/stream")
 async def chat_stream(session_id: str, req: QueryRequest,
-                      caller: str = Depends(require_caller)):
+                      caller: str = Depends(require_caller),
+                      x_user_id: str | None = Header(default=None)):
     """Server-Sent Events: `meta` → `delta`* → `done`."""
     pipeline: RAGPipeline = _state["pipeline"]
     sessions = _state["sessions"]
     history = sessions.get(session_id)
 
     async def event_stream():
-        answer_text = ""
+        answer_text, meta = "", {}
         async for event in pipeline.answer_stream(
-                req.question, history=history or None):
+                req.question, history=history or None,
+                user_context=_user_context_for(x_user_id)):
+            if event["type"] == "meta":
+                meta = event
             if event["type"] == "done":
                 answer_text = event["answer"]
             yield f"event: {event['type']}\ndata: {json.dumps(event)}\n\n"
         sessions.append(session_id, "user", req.question)
         sessions.append(session_id, "assistant", answer_text)
+        _after_chat_turn(x_user_id, session_id, req.question, answer_text,
+                         meta.get("intent", ""), meta.get("tickers", []))
 
     return StreamingResponse(
         event_stream(), media_type="text/event-stream",
@@ -197,3 +238,23 @@ async def chat_stream(session_id: str, req: QueryRequest,
 def reset_chat(session_id: str, caller: str = Depends(require_caller)):
     _state["sessions"].clear(session_id)
     return {"status": "cleared", "session_id": session_id}
+
+
+# ---------------------------------------------------------------------------
+# User memory — governance: fully visible, fully erasable
+# ---------------------------------------------------------------------------
+@app.get("/memory/{user_id}")
+def get_memory(user_id: str, caller: str = Depends(require_caller)):
+    mem = _state["user_memory"]
+    return {
+        "user_id": user_id,
+        "facts": mem.get_facts(user_id),
+        "recent_events": mem.get_events(user_id, limit=20),
+    }
+
+
+@app.delete("/memory/{user_id}")
+def delete_memory(user_id: str, caller: str = Depends(require_caller)):
+    _state["user_memory"].clear(user_id)
+    logger.info("user memory erased", extra={"user_id": user_id})
+    return {"status": "erased", "user_id": user_id}

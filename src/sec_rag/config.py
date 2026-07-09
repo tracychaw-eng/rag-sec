@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     filings_dir: Path = Path("data/filings")
     store_dir: Path = Path("data/store")          # parent/child chunk JSONL
     qdrant_path: Path = Path("qdrant_db")          # embedded Qdrant (local mode)
+    # Set SECRAG_QDRANT_URL (e.g. http://qdrant:6333) to use a Qdrant server
+    # instead of embedded local mode. Required for replicas > 1 — local mode
+    # takes an exclusive file lock.
+    qdrant_url: str | None = None
     # Collection name carries the embedding model + schema version so an
     # embedding-model change can never silently mix vector spaces.
     collection: str = "sec10k_children_3small_v3"
@@ -84,6 +88,13 @@ class Settings(BaseSettings):
     @property
     def api_key_set(self) -> frozenset[str]:
         return frozenset(k.strip() for k in self.api_keys.split(",") if k.strip())
+
+    # --- Online judge (production hallucination sampling) ---
+    judge_sample_rate: float = 0.0     # fraction of answers scored; 0 = off
+    judge_log_path: Path = Path("logs/judge.jsonl")
+
+    # --- User memory ---
+    memory_confidence_floor: float = 0.7
 
     # --- Observability ---
     langfuse_public_key: str | None = Field(

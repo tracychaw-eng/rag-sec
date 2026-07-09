@@ -9,10 +9,9 @@
 #   A PVC (sec-rag-corpus) pre-populated with data/store + qdrant_db —
 #   run the ingestion job below (or copy from a build machine).
 #
-# NOTE: replicas is pinned to 1 because Qdrant local mode takes an
-# exclusive file lock on its volume. To scale horizontally: run a Qdrant
-# server (or managed) and point the retriever at it, then raise replicas —
-# Redis already makes caches/sessions/rate limits replica-safe.
+# Scale-out: the API talks to a Qdrant SERVER (no file lock) and Redis
+# (shared caches/sessions/rate limits), so replicas > 1 is safe. The
+# chunk-store volume is read-only at serving time and mounts ReadOnlyMany.
 
 apiVersion: apps/v1
 kind: Deployment
@@ -20,7 +19,7 @@ metadata:
   name: sec-rag-api
   namespace: sec-rag
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels: {app: sec-rag-api}
   template:
@@ -38,11 +37,15 @@ spec:
           env:
             - name: SECRAG_REDIS_URL
               value: redis://sec-rag-redis:6379/0
+            - name: SECRAG_QDRANT_URL
+              value: http://sec-rag-qdrant:6333
+            # - name: SECRAG_JUDGE_SAMPLE_RATE
+            #   value: "0.05"
             # - name: OTEL_EXPORTER_OTLP_ENDPOINT
             #   value: http://otel-collector.observability:4318
           volumeMounts:
-            - {name: corpus, mountPath: /app/data/store, subPath: store}
-            - {name: corpus, mountPath: /app/qdrant_db, subPath: qdrant_db}
+            - {name: corpus, mountPath: /app/data/store, subPath: store,
+               readOnly: true}
           readinessProbe:
             httpGet: {path: /health, port: 8000}
             initialDelaySeconds: 20
@@ -107,6 +110,53 @@ metadata:
   name: sec-rag-corpus
   namespace: sec-rag
 spec:
-  accessModes: [ReadWriteOnce]
+  accessModes: [ReadWriteMany]   # read-only mounts across api replicas
   resources:
     requests: {storage: 2Gi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sec-rag-qdrant
+  namespace: sec-rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: sec-rag-qdrant}
+  template:
+    metadata:
+      labels: {app: sec-rag-qdrant}
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:latest
+          ports:
+            - containerPort: 6333
+          volumeMounts:
+            - {name: qdrant-data, mountPath: /qdrant/storage}
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1Gi}
+      volumes:
+        - name: qdrant-data
+          persistentVolumeClaim: {claimName: sec-rag-qdrant-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sec-rag-qdrant
+  namespace: sec-rag
+spec:
+  selector: {app: sec-rag-qdrant}
+  ports:
+    - port: 6333
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sec-rag-qdrant-data
+  namespace: sec-rag
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 5Gi}

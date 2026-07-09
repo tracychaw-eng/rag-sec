@@ -1,11 +1,14 @@
-# Local/single-host deployment: API + Redis (caches, sessions, rate limits).
+# Local/single-host deployment: API + Redis + Qdrant server.
 #
 #   docker compose up --build
-#   curl -H "X-API-Key: dev-key" -X POST localhost:8000/query \
-#        -H "Content-Type: application/json" -d '{"question": "..."}'
+#   # first time: ingest into the server from the host
+#   $env:SECRAG_QDRANT_URL='http://localhost:6333'; python -m sec_rag.ingestion.sync --years 2
+#   # or migrate existing embedded vectors without re-embedding:
+#   python -m sec_rag.ingestion.migrate_qdrant --to http://localhost:6333
 #
-# Requires an ingested corpus on the host (python -m sec_rag.ingestion.pipeline)
-# and OPENAI_API_KEY / COHERE_API_KEY in the environment or a .env file.
+# With Qdrant as a server (no file lock) plus Redis-backed caches/sessions/
+# rate limits, the API scales horizontally:
+#   docker compose up --scale api=2   (add a load balancer for a single port)
 
 services:
   api:
@@ -18,15 +21,27 @@ services:
       COHERE_API_KEY: ${COHERE_API_KEY}
       SECRAG_API_KEYS: ${SECRAG_API_KEYS:-dev-key}
       SECRAG_REDIS_URL: redis://redis:6379/0
+      SECRAG_QDRANT_URL: http://qdrant:6333
+      # SECRAG_JUDGE_SAMPLE_RATE: "0.05"
       # OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY: set to enable Langfuse
     volumes:
       - ./data/store:/app/data/store
-      - ./qdrant_db:/app/qdrant_db
     depends_on:
       - redis
+      - qdrant
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
 
   redis:
     image: redis:7-alpine
     # No host port — internal only. Uncomment to inspect from the host:
     # ports: ["6379:6379"]
+
+volumes:
+  qdrant_data:

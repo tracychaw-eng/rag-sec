@@ -27,6 +27,10 @@ Analyze the user's question and return JSON with these fields:
 - "tickers": list of tickers the question is about. Use [] if the question
   does not name or clearly imply specific companies (means: search all).
   Comparative questions like "which company is most X" imply ALL companies.
+- "years": list of filing years (integers) ONLY if the question explicitly
+  restricts to specific years or asks to compare across years (e.g.
+  "in the 2025 10-K", "how did X change year over year"). Use [] otherwise —
+  most questions want the latest information and should not be restricted.
 - "rewritten_query": the question rewritten as a standalone, retrieval-friendly
   query (resolve pronouns using the conversation history if provided).
 - "paraphrases": 2 alternative phrasings using different vocabulary — think of
@@ -48,12 +52,15 @@ class QueryPlanner:
         }
 
     async def plan(self, question: str,
-                   history: list[dict] | None = None) -> QueryPlan:
+                   history: list[dict] | None = None,
+                   user_context: str | None = None) -> QueryPlan:
         ticker_list = "\n".join(f"  {t}: {n}" for t, n in self.known_tickers.items())
         messages = [
             {"role": "system",
              "content": PLANNER_PROMPT.format(tickers=ticker_list)},
         ]
+        if user_context:
+            messages.append({"role": "user", "content": user_context})
         if history:
             convo = "\n".join(f"{m['role']}: {m['content']}" for m in history[-6:])
             messages.append({"role": "user",
@@ -77,6 +84,8 @@ class QueryPlanner:
             return QueryPlan(
                 intent=intent,
                 tickers=tickers,
+                years=[int(y) for y in data.get("years", [])
+                       if str(y).isdigit()][:4],
                 rewritten_query=data.get("rewritten_query") or question,
                 paraphrases=[p for p in data.get("paraphrases", [])[:2]
                              if isinstance(p, str)],

@@ -39,20 +39,32 @@ def _split_sentences(text: str) -> list[str]:
     return parts
 
 
+def _join_units(units: list[str]) -> str:
+    """Prose sentences join with spaces; table rows (pipe lines) keep
+    their own lines so numeric rows stay readable."""
+    out = []
+    for u in units:
+        if out:
+            out.append("\n" if (u.startswith("|") or
+                                out[-1].startswith("|")) else " ")
+        out.append(u)
+    return "".join(out)
+
+
 def _pack(units: list[str], budget: int) -> list[str]:
     """Greedy packing of text units into chunks of <= budget tokens."""
     chunks, cur, cur_tok = [], [], 0
     for u in units:
         t = _ntokens(u)
         if cur and cur_tok + t > budget:
-            chunks.append(" ".join(cur))
+            chunks.append(_join_units(cur))
             cur, cur_tok = [], 0
         # A single unit larger than budget becomes its own chunk (rare:
         # tables flattened to one line)
         cur.append(u)
         cur_tok += t
     if cur:
-        chunks.append(" ".join(cur))
+        chunks.append(_join_units(cur))
     return chunks
 
 
@@ -98,7 +110,7 @@ def chunk_section(
                 cur_tok += _ntokens(p_sentences[end])
                 cur.append(p_sentences[end])
                 end += 1
-            child_text = " ".join(cur)
+            child_text = _join_units(cur)
             children.append(ChildChunk(
                 id=f"{pid}_c{ci:03d}", parent_id=pid,
                 ticker=ticker, filing_date=filing_date,

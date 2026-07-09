@@ -1,0 +1,258 @@
+{
+  "label": "secrag-v4",
+  "date": "2026-07-09",
+  "n_questions": 22,
+  "retrieval": {
+    "factual": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 7
+    },
+    "reasoning": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.466,
+      "n": 5
+    },
+    "comparison": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 5
+    },
+    "overall": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.843,
+      "n": 17
+    }
+  },
+  "retrieval_per_question": {
+    "F001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F006": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F007": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R001": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R002": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R004": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R005": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "C001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "C002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "C003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "C004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "C005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "A001": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A002": {
+      "recall": null,
+      "precision": null,
+      "k": 0
+    },
+    "A003": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A004": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A005": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    }
+  },
+  "abstention": {
+    "A001": true,
+    "A002": true,
+    "A003": true,
+    "A004": true,
+    "A005": true
+  },
+  "abstention_note": "Dataset v2 (2026-07-08): adversarial questions are absent from any 10-K by construction. Reports scored against dataset v1 (labels A001/A002/A004 = revenue/headcount/CEO) have stale gold labels for this category.",
+  "ragas": {
+    "overall": {
+      "faithfulness": 0.962,
+      "answer_relevancy": 0.878,
+      "context_recall": 0.945,
+      "context_precision": 0.863
+    },
+    "factual": {
+      "faithfulness": 0.974,
+      "answer_relevancy": 0.916,
+      "context_recall": 1.0,
+      "context_precision": 0.962
+    },
+    "reasoning": {
+      "faithfulness": 0.945,
+      "answer_relevancy": 0.826,
+      "context_recall": 0.867,
+      "context_precision": 0.725
+    }
+  },
+  "ragas_per_question": {
+    "F001": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F002": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.978,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F003": {
+      "faithfulness": 0.818,
+      "answer_relevancy": 0.975,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F004": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.886,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.81,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F006": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.85,
+      "context_recall": 1.0,
+      "context_precision": 0.733
+    },
+    "F007": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.916,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R001": {
+      "faithfulness": 0.769,
+      "answer_relevancy": 0.854,
+      "context_recall": 1.0,
+      "context_precision": 0.383
+    },
+    "R002": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.66,
+      "context_recall": 0.667,
+      "context_precision": 1.0
+    },
+    "R003": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.965,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R004": {
+      "faithfulness": 0.958,
+      "answer_relevancy": 0.8,
+      "context_recall": 0.667,
+      "context_precision": 0.242
+    },
+    "R005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.849,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    }
+  }
+}
