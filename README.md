@@ -159,7 +159,7 @@ src/sec_rag/
 └── observability/     tracing+cost, JSON logs, online judge
 eval/                  harness, runners, thresholds, question generation
 docs/                  phase1–3 design docs · legacy-readme.md (original
-                       LlamaIndex learning journal this project grew from)
+                       LlamaIndex implementation journal this project grew from)
 ```
 
 ## History
