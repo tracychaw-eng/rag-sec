@@ -72,19 +72,40 @@ docker compose up --build -d
 #    one-time: copy local vectors into the server (no re-embedding)
 python -m sec_rag.ingestion.migrate_qdrant --to http://localhost:6333
 
-# 3. Ask
+# 3. Ask — open the chat UI in your browser:
+#    http://localhost:8000        (API key: dev-key)
+#    …or hit the API directly:
 curl -s -X POST localhost:8000/query -H "X-API-Key: dev-key" `
   -H "Content-Type: application/json" `
   -d '{"question": "How do MSFT and JPM differ on cybersecurity risk?"}'
 ```
 
 No Docker? `uvicorn sec_rag.api.app:app --port 8000` serves from the
-embedded Qdrant (`qdrant_db/`) directly — same API, single process.
+embedded Qdrant (`qdrant_db/`) directly — same API and UI, single process.
+
+## Chat UI
+
+`http://localhost:8000/` serves a built-in chat page (single
+self-contained HTML file, no separate frontend to run):
+
+- **streaming answers** — tokens render as they generate, with a
+  retrieval indicator while the search runs
+- **source chips** per answer (ticker + Item, e.g. `NVDA Item 7`) plus
+  latency and dollar cost
+- **real conversations** — follow-ups like "how does that compare to
+  Microsoft?" resolve against the previous turn; *New chat* resets
+- API-key field (persisted in the browser), light/dark follows your
+  system theme
+
+It talks to the same authenticated endpoints as any other client — no
+special server-side state. The interactive API reference (Swagger) stays
+at `http://localhost:8000/docs`.
 
 ## API
 
 | Endpoint | Purpose |
 | --- | --- |
+| `GET /` | built-in chat UI (see above) |
 | `GET /health` | readiness, corpus/filings, cache hit rates, judge stats |
 | `POST /query` | single-shot answer + citations, provenance, latency, cost |
 | `POST /chat/{session}` | multi-turn (follow-ups condensed to standalone queries) |
@@ -155,6 +176,7 @@ src/sec_rag/
 ├── retrieval/         planner, BM25, RRF fusion, reranker, hybrid retriever
 ├── generation/        cited, intent-specific prompts (PROMPT_VERSION)
 ├── api/               FastAPI app (auth, rate limits, SSE, memory)
+│                        + ui.html (built-in chat page served at /)
 ├── memory.py          per-user semantic/episodic memory + governance
 └── observability/     tracing+cost, JSON logs, online judge
 eval/                  harness, runners, thresholds, question generation
