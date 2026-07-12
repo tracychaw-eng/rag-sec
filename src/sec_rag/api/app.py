@@ -19,9 +19,10 @@ import json
 import logging
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..memory import MemoryExtractor, format_user_context, make_user_memory
@@ -140,6 +141,14 @@ def _to_response(ans) -> QueryResponse:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+@app.get("/", include_in_schema=False)
+def ui():
+    """Chat UI — a single self-contained page; the API calls it makes are
+    the same authenticated endpoints as any other client."""
+    return FileResponse(Path(__file__).parent / "ui.html",
+                        media_type="text/html")
+
+
 @app.get("/health")
 def health():
     pipeline: RAGPipeline = _state.get("pipeline")
