@@ -20,7 +20,9 @@ jobs:
       - name: Lint (ruff)
         run: ruff check src tests eval
       - name: Unit tests
-        run: pytest tests/unit -q
+        # python -m puts the repo root on sys.path (the eval/ package is
+        # repo-local, not installed)
+        run: python -m pytest tests/unit -q
 
   docker-build:
     runs-on: ubuntu-latest
