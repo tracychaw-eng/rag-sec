@@ -11,3 +11,4 @@ logs/
 eval/*.log
 eval/results_smoke.json
 eval/metrics_smoke.json
+presentation/
