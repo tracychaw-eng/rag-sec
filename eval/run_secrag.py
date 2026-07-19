@@ -88,7 +88,8 @@ def main():
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nRaw results saved to {out}")
 
-    evaluate_results(results, label=args.label, with_ragas=not args.no_ragas)
+    evaluate_results(results, label=args.label, with_ragas=not args.no_ragas,
+                     dataset_version=dataset["metadata"].get("version", 1))
 
 
 if __name__ == "__main__":

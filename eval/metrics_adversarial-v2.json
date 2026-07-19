@@ -1,6 +1,7 @@
 {
   "label": "adversarial-v2",
   "date": "2026-07-08",
+  "dataset_version": 2,
   "n_questions": 5,
   "retrieval": {
     "overall": {

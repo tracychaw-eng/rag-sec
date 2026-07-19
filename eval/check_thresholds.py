@@ -19,6 +19,16 @@ def check(metrics: dict, thresholds: dict) -> list[str]:
     """Returns a list of violations (empty = pass)."""
     violations = []
 
+    # Floors are calibrated per dataset version; gating a report from a
+    # different exam is meaningless and must fail loudly.
+    report_ds = metrics.get("dataset_version")
+    floor_ds = thresholds.get("dataset_version")
+    if floor_ds is not None and report_ds is not None and report_ds != floor_ds:
+        violations.append(
+            f"dataset_version mismatch: report graded on dataset v{report_ds}, "
+            f"thresholds calibrated for v{floor_ds} — recalibrate "
+            f"eval/thresholds.json before gating")
+
     ragas_overall = (metrics.get("ragas") or {}).get("overall") or {}
     for name, floor in thresholds.get("ragas", {}).items():
         value = ragas_overall.get(name)

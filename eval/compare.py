@@ -29,6 +29,20 @@ def main():
     label_a, label_b = sys.argv[1], sys.argv[2]
     a, b = load(label_a), load(label_b)
 
+    va, vb = a.get("dataset_version"), b.get("dataset_version")
+    if va != vb:
+        print("!" * 82)
+        print(f"  WARNING: cross-dataset comparison — {label_a} was graded "
+              f"on dataset v{va},")
+        print(f"  {label_b} on dataset v{vb}. Absolute scores are NOT "
+              f"comparable across dataset")
+        print("  versions (different questions = a different exam). Deltas "
+              "below reflect the")
+        print("  dataset change at least as much as any pipeline change.")
+        print("!" * 82)
+    else:
+        print(f"(both reports graded on dataset v{va})")
+
     print(f"{'':<34} {label_a[:18]:>18} {label_b[:18]:>18} {'delta':>8}")
     print("-" * 82)
 

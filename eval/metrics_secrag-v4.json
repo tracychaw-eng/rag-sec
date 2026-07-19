@@ -1,6 +1,7 @@
 {
   "label": "secrag-v4",
   "date": "2026-07-09",
+  "dataset_version": 3,
   "n_questions": 22,
   "retrieval": {
     "factual": {

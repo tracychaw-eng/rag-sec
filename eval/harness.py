@@ -183,14 +183,28 @@ def run_ragas(results: list[dict], judge_model: str = "gpt-4o-mini"):
 # ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
+def _current_dataset_version() -> int | None:
+    try:
+        meta = json.loads(Path("evaluation_dataset.json")
+                          .read_text(encoding="utf-8"))["metadata"]
+        return meta.get("version", 1)
+    except (OSError, json.JSONDecodeError, KeyError):
+        return None
+
+
 def evaluate_results(results: list[dict], label: str, with_ragas: bool = True,
-                     out_dir: Path = Path("eval")) -> dict:
+                     out_dir: Path = Path("eval"),
+                     dataset_version: int | None = None) -> dict:
     retrieval = compute_retrieval_metrics(results)
     abstention = compute_abstention(results)
 
     report = {
         "label": label,
         "date": date.today().isoformat(),
+        # Which exam this report was graded on. Scores are only comparable
+        # between reports with the same dataset_version.
+        "dataset_version": (dataset_version if dataset_version is not None
+                            else _current_dataset_version()),
         "n_questions": len(results),
         "retrieval": retrieval["summary"],
         "retrieval_per_question": retrieval["per_question"],
@@ -241,7 +255,10 @@ def evaluate_results(results: list[dict], label: str, with_ragas: bool = True,
 
 def _print_report(report: dict, results: list[dict]) -> None:
     print("=" * 68)
-    print(f"EVALUATION REPORT — {report['label']}  ({report['date']})")
+    header = f"EVALUATION REPORT — {report['label']}  ({report['date']})"
+    if report.get("dataset_version"):
+        header += f"  [dataset v{report['dataset_version']}]"
+    print(header)
     print("=" * 68)
 
     print("\nRETRIEVAL (source-level, vs expected tickers)")

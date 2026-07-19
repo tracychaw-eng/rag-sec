@@ -38,3 +38,24 @@ def test_abstention_rate_fails():
 def test_missing_metric_reported():
     v = check({"ragas": {"overall": {}}}, THRESHOLDS)
     assert any("missing" in x for x in v)
+
+
+def test_dataset_version_mismatch_fails():
+    thresholds = {**THRESHOLDS, "dataset_version": 4}
+    m = _metrics()
+    m["dataset_version"] = 3
+    v = check(m, thresholds)
+    assert any("dataset_version mismatch" in x for x in v)
+
+
+def test_matching_dataset_version_passes():
+    thresholds = {**THRESHOLDS, "dataset_version": 4}
+    m = _metrics()
+    m["dataset_version"] = 4
+    assert check(m, thresholds) == []
+
+
+def test_legacy_report_without_version_not_blocked():
+    # pre-backfill reports lack the field — absence is not a violation
+    thresholds = {**THRESHOLDS, "dataset_version": 4}
+    assert check(_metrics(), thresholds) == []
