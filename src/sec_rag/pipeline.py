@@ -41,7 +41,7 @@ class RAGPipeline:
         )
         self.openai = openai_client
         self.judge = (OnlineJudge(
-            openai_client, self.cfg.llm_model,
+            openai_client, self.cfg.judge_model,
             self.cfg.judge_sample_rate, self.cfg.judge_log_path)
             if self.cfg.judge_sample_rate > 0 else None)
         embed_cache = make_cache("embed", self.cfg.cache_max_items,

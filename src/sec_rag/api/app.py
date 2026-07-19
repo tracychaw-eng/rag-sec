@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
                                      pipeline.cfg.redis_url)
     _state["user_memory"] = make_user_memory(pipeline.cfg.redis_url)
     _state["memory_extractor"] = MemoryExtractor(
-        pipeline.openai, pipeline.cfg.llm_model, _state["user_memory"],
+        pipeline.openai, pipeline.cfg.planner_model, _state["user_memory"],
         pipeline.cfg.memory_confidence_floor)
     logger.info("sec-rag api ready", extra={
         "children": len(pipeline.retriever.children_by_id),

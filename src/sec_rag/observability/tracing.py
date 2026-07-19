@@ -22,6 +22,7 @@ from pathlib import Path
 # $ per 1M tokens (update alongside model changes in config.py)
 PRICES = {
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "gpt-4o": {"input": 2.50, "output": 10.00},
     "text-embedding-3-small": {"input": 0.02, "output": 0.0},
 }
 # $ per rerank search (Cohere rerank-english-v3.0: $2.00 / 1k searches)

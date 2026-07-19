@@ -27,10 +27,13 @@ Analyze the user's question and return JSON with these fields:
 - "tickers": list of tickers the question is about. Use [] if the question
   does not name or clearly imply specific companies (means: search all).
   Comparative questions like "which company is most X" imply ALL companies.
-- "years": list of filing years (integers) ONLY if the question explicitly
-  restricts to specific years or asks to compare across years (e.g.
-  "in the 2025 10-K", "how did X change year over year"). Use [] otherwise —
-  most questions want the latest information and should not be restricted.
+- "years": list of years (integers) ONLY if the question explicitly asks
+  about a specific fiscal year / reporting period or compares across years
+  (e.g. "in the 2025 10-K", "as of December 31, 2024", "how did X change
+  year over year"). The retrieval layer maps them to the right filings.
+  Use [] otherwise — most questions want the latest information and should
+  not be restricted, and a date that merely appears in passing (an event
+  date, a regulation year) is NOT a year restriction.
 - "rewritten_query": the question rewritten as a standalone, retrieval-friendly
   query (resolve pronouns using the conversation history if provided).
 - "paraphrases": 2 alternative phrasings using different vocabulary — think of

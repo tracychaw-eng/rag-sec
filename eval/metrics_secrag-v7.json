@@ -1,0 +1,757 @@
+{
+  "label": "secrag-v7",
+  "date": "2026-07-18",
+  "dataset_version": 4,
+  "n_questions": 71,
+  "retrieval": {
+    "factual": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.909,
+      "n": 36
+    },
+    "reasoning": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.733,
+      "n": 10
+    },
+    "comparison": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 1.0,
+      "n": 15
+    },
+    "overall": {
+      "source_recall@K": 1.0,
+      "source_precision@K": 0.902,
+      "n": 61
+    }
+  },
+  "retrieval_per_question": {
+    "F001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "F006": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F007": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R001": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R002": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "R004": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "R005": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "C001": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "C002": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "C003": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "C004": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "C005": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "A001": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A002": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A003": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A004": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A005": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "N106": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N107": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N108": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N109": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N110": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N111": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N112": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N113": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "N114": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "N115": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N116": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "N117": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y106": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y107": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y108": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "Y109": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "Y110": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y111": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y112": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "Y113": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "Y114": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 4,
+      "missing_tickers": []
+    },
+    "Y115": {
+      "recall": 1.0,
+      "precision": 0.375,
+      "k": 8,
+      "missing_tickers": []
+    },
+    "Y116": {
+      "recall": 1.0,
+      "precision": 0.333,
+      "k": 9,
+      "missing_tickers": []
+    },
+    "H105": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H106": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H107": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "H108": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H109": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H110": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "H111": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H112": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "H113": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "H114": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F104": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F105": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 3,
+      "missing_tickers": []
+    },
+    "F106": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F107": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 3,
+      "missing_tickers": []
+    },
+    "F108": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "F109": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 5,
+      "missing_tickers": []
+    },
+    "R103": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R104": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R105": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R106": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "R107": {
+      "recall": 1.0,
+      "precision": 1.0,
+      "k": 6,
+      "missing_tickers": []
+    },
+    "A006": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A007": {
+      "recall": null,
+      "precision": null,
+      "k": 4
+    },
+    "A008": {
+      "recall": null,
+      "precision": null,
+      "k": 5
+    },
+    "A009": {
+      "recall": null,
+      "precision": null,
+      "k": 6
+    },
+    "A010": {
+      "recall": null,
+      "precision": null,
+      "k": 9
+    }
+  },
+  "abstention": {
+    "A001": true,
+    "A002": true,
+    "A003": true,
+    "A004": true,
+    "A005": true,
+    "A006": true,
+    "A007": true,
+    "A008": true,
+    "A009": true,
+    "A010": false
+  },
+  "abstention_note": "Dataset v2 (2026-07-08): adversarial questions are absent from any 10-K by construction. Reports scored against dataset v1 (labels A001/A002/A004 = revenue/headcount/CEO) have stale gold labels for this category.",
+  "ragas": {
+    "overall": {
+      "faithfulness": 0.863,
+      "answer_relevancy": 0.83,
+      "context_recall": 0.862,
+      "context_precision": 0.841
+    },
+    "factual": {
+      "faithfulness": 0.875,
+      "answer_relevancy": 0.811,
+      "context_recall": 0.857,
+      "context_precision": 0.839
+    },
+    "reasoning": {
+      "faithfulness": 0.818,
+      "answer_relevancy": 0.898,
+      "context_recall": 0.883,
+      "context_precision": 0.849
+    }
+  },
+  "ragas_per_question": {
+    "F001": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F002": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.961,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F003": {
+      "faithfulness": 0.636,
+      "answer_relevancy": 0.975,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F004": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.884,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.81,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F006": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.866,
+      "context_recall": 1.0,
+      "context_precision": 0.917
+    },
+    "F007": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.916,
+      "context_recall": 1.0,
+      "context_precision": 0.967
+    },
+    "R001": {
+      "faithfulness": 0.571,
+      "answer_relevancy": 0.806,
+      "context_recall": 1.0,
+      "context_precision": 0.383
+    },
+    "R002": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.728,
+      "context_recall": 0.667,
+      "context_precision": 1.0
+    },
+    "R003": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.965,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R004": {
+      "faithfulness": 0.812,
+      "answer_relevancy": 0.79,
+      "context_recall": 0.667,
+      "context_precision": 0.242
+    },
+    "R005": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.874,
+      "context_recall": 1.0,
+      "context_precision": 0.95
+    },
+    "N106": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "context_precision": 0.0
+    },
+    "N107": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 0.917
+    },
+    "N108": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 0.806
+    },
+    "N109": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 0.833
+    },
+    "N110": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "context_precision": 0.833
+    },
+    "N111": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.902,
+      "context_recall": 0.0,
+      "context_precision": 1.0
+    },
+    "N112": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 0.583
+    },
+    "N113": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.705,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "N114": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.879,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "N115": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.0,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "N116": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "N117": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 0.333
+    },
+    "Y106": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.96,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "Y107": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.952,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "Y108": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.961,
+      "context_recall": 0.667,
+      "context_precision": 0.401
+    },
+    "Y109": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.994,
+      "context_recall": 0.667,
+      "context_precision": 0.339
+    },
+    "Y110": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.714,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "Y111": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.988,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "Y112": {
+      "faithfulness": 0.625,
+      "answer_relevancy": 0.0,
+      "context_recall": 0.0,
+      "context_precision": 0.722
+    },
+    "Y113": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.939,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "Y114": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.76,
+      "context_recall": 0.5,
+      "context_precision": 1.0
+    },
+    "Y115": {
+      "faithfulness": 0.944,
+      "answer_relevancy": 0.957,
+      "context_recall": 1.0,
+      "context_precision": 0.125
+    },
+    "Y116": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.896,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F104": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "context_recall": 1.0,
+      "context_precision": 0.667
+    },
+    "F105": {
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.668,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F106": {
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.948,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F107": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.912,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "F108": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.977,
+      "context_recall": 1.0,
+      "context_precision": 0.75
+    },
+    "F109": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.671,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R103": {
+      "faithfulness": 0.357,
+      "answer_relevancy": 0.975,
+      "context_recall": 0.5,
+      "context_precision": 0.917
+    },
+    "R104": {
+      "faithfulness": 0.692,
+      "answer_relevancy": 0.979,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R105": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.947,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R106": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.924,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    },
+    "R107": {
+      "faithfulness": 0.75,
+      "answer_relevancy": 0.995,
+      "context_recall": 1.0,
+      "context_precision": 1.0
+    }
+  }
+}

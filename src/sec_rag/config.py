@@ -23,8 +23,13 @@ class Settings(BaseSettings):
     cohere_api_key: str = Field(validation_alias="COHERE_API_KEY")
 
     # --- Models ---
-    llm_model: str = "gpt-4o-mini"
+    # Generation model. gpt-4o grounds measurably better than gpt-4o-mini
+    # (dev-split probe: faithfulness 0.398 -> 0.774 on the hardest
+    # questions) at ~6x the per-answer cost (~$0.025 vs ~$0.004). Set
+    # SECRAG_LLM_MODEL=gpt-4o-mini to trade quality for cost.
+    llm_model: str = "gpt-4o"
     planner_model: str = "gpt-4o-mini"
+    judge_model: str = "gpt-4o-mini"   # online-judge scoring stays cheap
     embed_model: str = "text-embedding-3-small"
     embed_dim: int = 1536
     rerank_model: str = "rerank-english-v3.0"
@@ -51,8 +56,10 @@ class Settings(BaseSettings):
     dense_top_k: int = 50
     bm25_top_k: int = 50
     rrf_k: int = 60
-    rerank_candidates: int = 30
-    rerank_top_n: int = 8           # children kept after rerank (precise mode)
+    rerank_candidates: int = 40     # widened: single table rows inside huge
+                                    # filings (JPM Item 15 ~1400 children)
+                                    # were falling off the rerank shortlist
+    rerank_top_n: int = 10          # children kept after rerank (precise mode)
     rerank_score_floor: float = 0.30
     rerank_min_keep: int = 4        # floor never cuts below this many
     reasoning_top_children: int = 12  # reasoning mode: no reranker (see README

@@ -145,3 +145,68 @@ speculative inference (faithfulness 0.231). Abstention 9/10.
 Thresholds were recalibrated to dataset v4's dev measurements
 (`eval/thresholds.json` carries `dataset_version` — floors are
 meaningless across dataset versions). Gate passes on secrag-v5.
+
+## Production quality push (2026-07-18)
+
+Goal: dev faithfulness 0.891 and source recall 0.836 were below a 0.9
+production bar. Method: diagnose dev failures → targeted fix → measure on
+dev → repeat; holdout untouched until the final release check.
+
+### Diagnosis
+
+9 of 10 dev source-recall misses shared one root cause: **the planner's
+year filter used question dates as filing years**. "As of December 31,
+2024" became `years=[2024]`, but JPM's FY2024 10-K is *filed 2025-02*
+(`filing_year=2025`) — the filter matched no filings and retrieval
+silently returned nothing. It even regressed a legacy question (R003,
+"November 2023 attack" → `years=[2023]`).
+
+### Iterations (all measured on the dev split, dataset v4)
+
+1. **Fiscal→filing year guardrail** (`retriever._effective_years`): keep a
+   requested year if that filing year exists, shift to Y+1 when the fiscal
+   year is reported in the next calendar year's filing (per ticker — JPM
+   files in February, MSFT in July), drop the filter entirely when nothing
+   survives. Plus grounded-inference prompt rules. → source recall
+   0.836 → **1.000**; faithfulness *fell* to 0.862 — because v5's number
+   was inflated: failed retrievals abstained, and abstentions carry no
+   claims to judge. Fixing recall replaced free passes with graded answers.
+2. **No-unit-conversion rule + wider rerank funnel** (40 candidates,
+   keep 10): correct answers like "$11.1 billion" vs context "11,146
+   (in millions)" were unmatchable for the judge; single table rows in
+   JPM's ~1,400-child Item 15 fell off the shortlist. → source precision
+   0.902; faithfulness flat.
+3. **gpt-4o for generation** (planner/judge/memory stay on mini) after a
+   10-question probe showed 0.398 → 0.774 on the hardest set, **plus**
+   filing-date attribution in the factual prompt (the multi-year cluster's
+   failure mode) and a hard-abstain rule for questions 10-Ks cannot answer
+   by nature (future events, market data, analyst opinion) — gpt-4o had
+   started "helpfully" answering those. → **dev faithfulness 0.901**
+   (0.935 excluding the three known-defective generated questions).
+
+Also measured, not assumed: re-judging identical answers showed
+faithfulness aggregates are stable (±0.001) while context_recall swings
+±0.07 and individual questions churn ±0.3 — chasing per-question judge
+scores is chasing noise.
+
+### Release check (holdout, frozen config, first look)
+
+Source recall 0.842 → **1.000**, source precision 0.663 → **0.821** — the
+retrieval fixes generalize completely. Faithfulness *point value* moved
+0.889 → 0.821, but that is a composition effect: v5's holdout average
+excluded three failed-retrieval abstentions from scoring; v9 answers all
+of them (two at 1.0, one ambiguous-scope artifact at 0.0). On questions
+scored in both runs: 0.889 vs 0.860 at n=12 — statistically flat.
+
+### Costs and residuals
+
+- Generation default is now gpt-4o: ~$0.02/answer vs ~$0.004
+  (`SECRAG_LLM_MODEL=gpt-4o-mini` to trade back).
+- Thresholds recalibrated upward (source-recall floor 0.76 → 0.92) so the
+  gains are CI-enforced.
+- Known residuals, all dataset-side: N107/N105 ask for figures with
+  ambiguous scope (multiple legitimate "carrying value"/"reported vs
+  managed" rows); R102/R103/R104 are "how might X affect Y" questions
+  whose *reference answers themselves speculate* — a faithfulness rubric
+  penalizes any engagement with them. Fixing these means dataset v5
+  (regenerate with tighter generation rules), not pipeline work.

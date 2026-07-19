@@ -137,9 +137,38 @@ class HybridRetriever:
         return ordered[:max_parents]
 
     # ------------------------------------------------------------------
+    def _effective_years(self, years: list[int] | None,
+                         tickers: list[str] | None) -> list[int] | None:
+        """Map question years to filing years that actually exist.
+
+        Questions date things by fiscal/data year ("as of December 31,
+        2024"), but a fiscal year Y is reported in a filing dated Y or
+        Y+1 depending on the company's calendar (JPM's FY2024 10-K is
+        filed 2025-02; MSFT's FY2025 is filed 2025-07). Policy, per year:
+        keep Y if the corpus has that filing year for the tickers in
+        scope, else shift to Y+1 if available. If nothing survives, drop
+        the filter entirely — old events are typically still described
+        in current filings, and a filter that matches no filings would
+        silently retrieve nothing (measured: 9 of 10 dev source-recall
+        misses in secrag-v5).
+        """
+        if not years:
+            return None
+        scope = {t.upper() for t in tickers} if tickers else None
+        avail = {int(d[:4]) for t, d in self.store.available_filings()
+                 if scope is None or t in scope}
+        eff = set()
+        for y in years:
+            if y in avail:
+                eff.add(y)
+            elif y + 1 in avail:
+                eff.add(y + 1)
+        return sorted(eff) or None
+
     async def retrieve(self, queries: list[str], mode: str = "precise",
                        tickers: list[str] | None = None,
                        years: list[int] | None = None) -> list[ContextBlock]:
+        years = self._effective_years(years, tickers)
         candidates = await self.retrieve_children(queries, tickers, years)
 
         if mode == "precise":

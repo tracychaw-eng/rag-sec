@@ -6,9 +6,12 @@ evaluation-gated development.
 
 ```text
 "What was NVIDIA's total revenue in its most recent fiscal year?"
-→ "NVIDIA's total revenue in fiscal year 2026 was $215.9 billion,
-   up 65% from $130.5 billion [NVDA, Item 7]."     6.2s · $0.0035
+→ "NVIDIA's total revenue in fiscal year 2026 was $215,938 million,
+   up 65% from $130,497 million [NVDA, Item 7]."     ~6s · ~$0.02
 ```
+
+(Generation uses gpt-4o by default — measurably better grounding; set
+`SECRAG_LLM_MODEL=gpt-4o-mini` for ~$0.004/answer at lower faithfulness.)
 
 **Corpus:** full 10-K filings (all Items, tables included), latest 2
 fiscal years for MSFT, NVDA, JPM — extendable to any ticker via
@@ -17,17 +20,25 @@ fiscal years for MSFT, NVDA, JPM — extendable to any ticker via
 ## Quality (measured, not claimed)
 
 Scored with RAGAS (LLM-as-judge) on a 90-question dataset with a held-out
-slice that is never tuned against:
+slice that is never tuned against (runs `secrag-v9` / `release-v9`,
+dataset v4):
 
 | Metric | dev (n=71) | holdout (n=19, never tuned on) |
 | --- | --- | --- |
-| faithfulness | 0.891 | 0.889 |
-| answer relevancy | 0.801 | 0.953 |
-| context recall | 0.880 | 0.958 |
-| source recall@K | 0.836 | 0.842 |
+| faithfulness | 0.901 | 0.821¹ |
+| answer relevancy | 0.825 | 0.950 |
+| context recall | 0.873 | 0.867 |
+| source recall@K | **1.000** | **1.000** |
+| source precision@K | 0.891 | 0.821 |
 
-No dev/holdout gap → not overfit to the tuned questions. Reports:
-`eval/metrics_*.json`; regression floors: `eval/thresholds.json`.
+¹ On the questions scored in both the before/after runs, holdout
+faithfulness is statistically flat (0.86–0.89 at n=12); the point drop is
+a composition effect — previously-failed retrievals abstained and were
+excluded from the average, and now get answered and graded. Details in
+`docs/phase3.md` (“Production quality push”).
+
+Reports: `eval/metrics_*.json` (each stamped with its `dataset_version`);
+regression floors: `eval/thresholds.json`, enforced nightly in CI.
 
 ## Architecture
 
@@ -125,6 +136,7 @@ Everything lives in [src/sec_rag/config.py](src/sec_rag/config.py)
 
 | Variable | Default | Effect |
 | --- | --- | --- |
+| `SECRAG_LLM_MODEL` | gpt-4o | generation model (`gpt-4o-mini` = ~6x cheaper, lower faithfulness) |
 | `SECRAG_REDIS_URL` | unset | Redis for caches/sessions/rate limits (needed for >1 replica) |
 | `SECRAG_QDRANT_URL` | unset | Qdrant server instead of embedded local mode |
 | `SECRAG_API_KEYS` | unset | comma-separated keys; unset = auth off (dev only) |
