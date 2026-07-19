@@ -35,7 +35,13 @@ def _split_sentences(text: str) -> list[str]:
         para = para.strip()
         if not para:
             continue
-        parts.extend(s for s in _SENTENCE_RE.split(para) if s.strip())
+        if para.startswith("|"):
+            # Table rows are atomic units — their appended context clause
+            # ("[tbl: The following table presents ...]") contains periods
+            # that must not trigger sentence splitting mid-row.
+            parts.append(para)
+        else:
+            parts.extend(s for s in _SENTENCE_RE.split(para) if s.strip())
     return parts
 
 

@@ -55,17 +55,72 @@ def _table_to_rows(table) -> str:
     row structure that makes financial-statement numbers answerable
     ("Revenue | 130,497 | 60,922"). iXBRL tables are full of empty
     spacer cells — those are dropped per row.
+
+    Every DATA row also gets an appended context clause
+    "[tbl: <caption>; cols: <column headers>]" so the row stays
+    self-describing when a chunk boundary separates it from its table's
+    header — the measured cause of judge-illegible numeric claims
+    ("| 473 |" means nothing without "Carrying value" / "2024").
     """
-    rows = []
+    row_cells = []
     for tr in table.find_all("tr"):
         cells = [c.get_text(" ", strip=True)
                  for c in tr.find_all(["td", "th"])]
-        cells = [c for c in cells if c]
+        row_cells.append([c for c in cells if c])
+
+    ctx = _table_context(table, row_cells)
+    rows = []
+    for cells in row_cells:
         if len(cells) >= 2:
-            rows.append("| " + " | ".join(cells) + " |")
+            line = "| " + " | ".join(cells) + " |"
+            if ctx and _is_data_row(cells):
+                line += f"  [{ctx}]"
+            rows.append(line)
         elif len(cells) == 1:
             rows.append(cells[0])       # section header row inside a table
     return "\n".join(rows)
+
+
+def _is_data_cell(cell: str) -> bool:
+    """Numeric cell that is NOT a year — years are column headers."""
+    bare = cell.strip().strip("$()%").replace(",", "").replace(".", "")
+    if not bare.isdigit():
+        return False
+    return not (len(bare) == 4 and 1900 <= int(bare) <= 2100)
+
+
+def _is_data_row(cells: list[str]) -> bool:
+    return any(_is_data_cell(c) for c in cells)
+
+
+def _table_context(table, row_cells: list[list[str]]) -> str:
+    """Compact "tbl: caption; cols: headers" clause for a table."""
+    # Column headers: leading rows with no data-like cells (year columns
+    # like "2026 | 2025" count as headers, not data)
+    header_parts = []
+    for cells in row_cells[:3]:
+        if not cells or _is_data_row(cells):
+            break
+        header_parts.append(" | ".join(cells))
+    headers = "; ".join(header_parts)[:120]
+
+    # Caption: nearest preceding prose text node outside any table
+    # (usually "The following table presents ...")
+    caption = ""
+    for s in table.find_all_previous(string=True, limit=200):
+        if s.find_parent("table"):
+            continue
+        t = " ".join(s.split())
+        if 20 <= len(t) <= 300 and sum(c.isalpha() for c in t) > len(t) * 0.6:
+            caption = t[:110]
+            break
+
+    parts = []
+    if caption:
+        parts.append(f"tbl: {caption}")
+    if headers:
+        parts.append(f"cols: {headers}")
+    return "; ".join(parts)
 
 
 def html_to_text(filepath: Path) -> str:

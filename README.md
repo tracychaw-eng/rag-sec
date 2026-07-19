@@ -20,23 +20,24 @@ fiscal years for MSFT, NVDA, JPM — extendable to any ticker via
 ## Quality (measured, not claimed)
 
 Scored with RAGAS (LLM-as-judge) on a 90-question dataset with a held-out
-slice that is never tuned against (runs `secrag-v10` / `release-v10`,
+slice that is never tuned against (runs `secrag-v11` / `release-v11`,
 dataset v5):
 
 | Metric | dev (n=71) | holdout (n=19, never tuned on) |
 | --- | --- | --- |
-| faithfulness¹ | 0.86 (band 0.86–0.90) | 0.84 |
-| answer relevancy | 0.79 | 0.94 |
-| context recall | 0.91 | 0.90 |
+| faithfulness¹ | 0.90 (band 0.86–0.90) | **0.92** |
+| answer relevancy | 0.78 | 0.94 |
+| context recall | 0.89 | 0.83 |
 | source recall@K | **1.000** | **1.000** |
-| source precision@K | 0.886 | 0.821 |
+| source precision@K | 0.887 | 0.825 |
 
-¹ Reported as a band, not a point: across six repeat runs, generation +
-judge variance is ±0.03, so single-run values inside 0.86–0.90 are not
-distinguishable. The residual gap to ~0.95 is dominated by a measured
-judge-legibility limit — answers citing figures that ARE in the retrieved
-table rows can't always be verified by the judge against dense pipe-row
-context. Details and history: `docs/phase3.md`.
+¹ Dev faithfulness is reported as a band: across repeat runs, generation
++ judge variance is ±0.03, so single-run values inside 0.86–0.90 are not
+distinguishable. The largest single quality lever was making table rows
+self-describing at parse time (each data row carries its table's caption
+and column headers) — holdout faithfulness rose 0.84 → 0.92 when the
+judge could finally verify numeric claims against their rows. Details
+and history: `docs/phase3.md`.
 
 Reports: `eval/metrics_*.json` (each stamped with its `dataset_version`);
 regression floors: `eval/thresholds.json`, enforced nightly in CI.
@@ -160,7 +161,7 @@ Questions are generated from corpus chunks with validation gates
 speculative framing (`eval/repair_questions.py`).
 
 ```powershell
-python -m pytest tests/unit -q                     # 57 tests, no keys needed
+python -m pytest tests/unit -q                     # 68 tests, no keys needed
 python -m eval.smoke_gate                          # deterministic CI gate
 python -m eval.run_secrag --label myrun --split dev    # full RAGAS run
 python -m eval.compare secrag-v4 myrun             # diff two runs

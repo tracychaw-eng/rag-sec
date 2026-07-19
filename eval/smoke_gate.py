@@ -21,7 +21,9 @@ from pathlib import Path
 
 from sec_rag.pipeline import RAGPipeline
 
-CITATION_RE = re.compile(r"\[[A-Z]{2,5},?\s*Item\s*\S+\]", re.IGNORECASE)
+# Accepts both citation forms the generator produces:
+#   [JPM, Item 1A]  and  [JPM 10-K filed 2026-02-13, Item 1A]
+CITATION_RE = re.compile(r"\[[A-Z]{2,5}[^\[\]]*Item\s*\S+\]", re.IGNORECASE)
 ABSTAIN_MARKER = "not available in the provided documents"
 
 # (question id, checks) — questions come from evaluation_dataset.json

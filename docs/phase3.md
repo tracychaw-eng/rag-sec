@@ -244,3 +244,39 @@ as-is, documented.
   source recall 1.000 / 1.000, source precision 0.886 / 0.821.
 - Thresholds recalibrated to the v5 band (floors below its low end);
   `dataset_version: 5` enforced by the gate.
+
+## Table context at parse time (2026-07-19)
+
+The isolated judge-legibility failure class is fixed at its root: the
+parser now appends a compact context clause to every DATA row it renders
+from an HTML table — "[tbl: <nearest preceding caption prose>; cols:
+<leading header rows>]" — so a row like "| Wholesale lending-related
+commitments | 473 |" stays self-describing even when a chunk boundary
+separates it from its table's header. Year-only header rows ("2026 |
+2025") are recognized as headers, not data; the chunker treats pipe rows
+as atomic units (caption periods must not sentence-split a row).
+
+Corpus re-ingested: 5,219 children (+22% text from context clauses,
+embedding cost still cents). One side effect: the generator now copies
+the richer chunk labels into citations ("[JPM 10-K filed 2026-02-13,
+Item 1A]"), so the smoke gate's citation regex accepts both forms.
+
+### Measured effect (dataset v5, unchanged)
+
+| | dev v10 → v11 | holdout v10 → v11 |
+| --- | --- | --- |
+| faithfulness | 0.860 → 0.897 | 0.836 → **0.917** |
+| context_precision | 0.823 → 0.813 | 0.727 → **0.874** |
+| source recall@K | 1.000 → 1.000 | 1.000 → 1.000 |
+
+The stuck-at-0.0 numeric questions (N105, N107, N110) all left the
+failing lists — the served stack now answers the historically hardest
+one correctly ("$2.7 billion" with the right filing). Holdout — the
+never-tuned split — benefited most, which is what a genuine data-quality
+fix (rather than tuning) should look like.
+
+Ops note: after any ingestion-schema change, rebuild the API image AND
+refresh the server collection (delete + re-migrate) — a stale container
+image silently reintroduces fixed bugs (observed: pre-guardrail code in
+the container returned empty retrievals while the embedded eval path was
+perfect).

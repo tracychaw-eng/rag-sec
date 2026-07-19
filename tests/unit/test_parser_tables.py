@@ -31,6 +31,23 @@ def test_table_rows_preserved(tmp_path: Path):
     assert "|  |" not in text
 
 
+def test_data_rows_carry_table_context(tmp_path: Path):
+    fp = tmp_path / "t.html"
+    fp.write_text(TABLE_HTML, encoding="utf-8")
+    text = html_to_text(fp)
+
+    revenue_row = next(ln for ln in text.splitlines()
+                       if ln.startswith("| Revenue |"))
+    # column headers attached (year row "2026 | 2025" is a header, not data)
+    assert "cols: Line item | 2026 | 2025" in revenue_row
+    # caption from the nearest preceding prose
+    assert "tbl: Revenue was strong this year" in revenue_row
+    # the header row itself carries no context clause
+    header_row = next(ln for ln in text.splitlines()
+                      if ln.startswith("| Line item |"))
+    assert "[tbl:" not in header_row and "[cols:" not in header_row
+
+
 def test_join_units_keeps_table_rows_on_own_lines():
     joined = _join_units([
         "Revenue grew strongly.",
@@ -41,3 +58,12 @@ def test_join_units_keeps_table_rows_on_own_lines():
     assert "Revenue grew strongly.\n| Revenue | 130,497 |" in joined
     assert "| Revenue | 130,497 |\n| Net income | 72,880 |" in joined
     assert "| Net income | 72,880 |\nCosts also rose." in joined
+
+
+def test_pipe_rows_never_sentence_split():
+    from sec_rag.ingestion.chunker import _split_sentences
+    row = ("| Revenue | 130,497 |  [tbl: The following table presents. "
+           "Revenue by segment; cols: 2026 | 2025]")
+    parts = _split_sentences("Prose sentence one. Prose two.\n" + row)
+    assert row in parts          # row survives as one atomic unit
+    assert len(parts) == 3       # two prose sentences + the row
