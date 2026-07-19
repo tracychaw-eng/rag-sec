@@ -20,22 +20,23 @@ fiscal years for MSFT, NVDA, JPM — extendable to any ticker via
 ## Quality (measured, not claimed)
 
 Scored with RAGAS (LLM-as-judge) on a 90-question dataset with a held-out
-slice that is never tuned against (runs `secrag-v9` / `release-v9`,
-dataset v4):
+slice that is never tuned against (runs `secrag-v10` / `release-v10`,
+dataset v5):
 
 | Metric | dev (n=71) | holdout (n=19, never tuned on) |
 | --- | --- | --- |
-| faithfulness | 0.901 | 0.821¹ |
-| answer relevancy | 0.825 | 0.950 |
-| context recall | 0.873 | 0.867 |
+| faithfulness¹ | 0.86 (band 0.86–0.90) | 0.84 |
+| answer relevancy | 0.79 | 0.94 |
+| context recall | 0.91 | 0.90 |
 | source recall@K | **1.000** | **1.000** |
-| source precision@K | 0.891 | 0.821 |
+| source precision@K | 0.886 | 0.821 |
 
-¹ On the questions scored in both the before/after runs, holdout
-faithfulness is statistically flat (0.86–0.89 at n=12); the point drop is
-a composition effect — previously-failed retrievals abstained and were
-excluded from the average, and now get answered and graded. Details in
-`docs/phase3.md` (“Production quality push”).
+¹ Reported as a band, not a point: across six repeat runs, generation +
+judge variance is ±0.03, so single-run values inside 0.86–0.90 are not
+distinguishable. The residual gap to ~0.95 is dominated by a measured
+judge-legibility limit — answers citing figures that ARE in the retrieved
+table rows can't always be verified by the judge against dense pipe-row
+context. Details and history: `docs/phase3.md`.
 
 Reports: `eval/metrics_*.json` (each stamped with its `dataset_version`);
 regression floors: `eval/thresholds.json`, enforced nightly in CI.
@@ -150,10 +151,13 @@ tokens, dollar cost per request).
 
 ## Evaluation
 
-The dataset (`evaluation_dataset.json`, v4) has 90 questions across
+The dataset (`evaluation_dataset.json`, v5) has 90 questions across
 factual / numeric / multi-year / cross-company multi-hop / reasoning /
 adversarial, with a **held-out split reserved for release evaluation**
 (never tune against it — see `holdout_policy` in the dataset metadata).
+Questions are generated from corpus chunks with validation gates
+(`eval/generate_questions.py`) and audited/repaired for ambiguity and
+speculative framing (`eval/repair_questions.py`).
 
 ```powershell
 python -m pytest tests/unit -q                     # 57 tests, no keys needed

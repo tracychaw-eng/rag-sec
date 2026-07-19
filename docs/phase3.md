@@ -210,3 +210,37 @@ scored in both runs: 0.889 vs 0.860 at n=12 — statistically flat.
   whose *reference answers themselves speculate* — a faithfulness rubric
   penalizes any engagement with them. Fixing these means dataset v5
   (regenerate with tighter generation rules), not pipeline work.
+
+## Dataset v5 QA pass (2026-07-18)
+
+An automated auditor (`eval/repair_questions.py`) swept all generated
+questions for the two defect classes found during the quality push:
+regex for speculative framings, and an LLM check that asks whether more
+than one figure in the filing defensibly answers a numeric question as
+worded. It flagged 14 of 68 — including, independently, exactly the
+questions that had churned through the low-faithfulness lists across
+runs (N114, R107, Y116, N102). 12 were regenerated in place under
+hardened prompts and a new competing-row validation gate (ids and
+dev/holdout splits unchanged); N103/N114 resisted 4 attempts and remain
+as-is, documented.
+
+### Outcome (dataset v5 re-baseline, runs secrag-v10 / release-v10)
+
+- The speculative-question class is fixed: R101/R103/R105/R106/R107 all
+  left the failing list.
+- Six runs of history (0.891, 0.862, 0.863, 0.869, 0.901, 0.860) force
+  an honest restatement: dev faithfulness is a **0.86–0.90 band**, not a
+  point — generation + judge variance across fresh runs is ±0.03, and
+  v9's 0.901 was the band's lucky end. README now reports the band.
+- The remaining failure class is **judge legibility on dense tables**:
+  repaired N105/N107 still score 0.0 even though their answers cite
+  figures that ARE present in the retrieved rows — the judge cannot
+  reliably verify claims against bare pipe-row context. This is the
+  documented next frontier and it is ingestion work, not dataset work:
+  preserve table captions and column headers on each row at parse time
+  (benefits retrieval, generation, and judging alike). A stronger or
+  multi-sample judge is the complementary measurement-side lever.
+- Retrieval metrics remain at the production bar on both splits:
+  source recall 1.000 / 1.000, source precision 0.886 / 0.821.
+- Thresholds recalibrated to the v5 band (floors below its low end);
+  `dataset_version: 5` enforced by the gate.

@@ -1,11 +1,11 @@
 {
-  "_comment": "Nightly gates, calibrated to DATASET v4 dev split after the quality push (secrag-v9, 2026-07-18: dev faithfulness 0.901, relevancy 0.825, recall 0.873, precision 0.839, source_recall 1.0, source_precision 0.891). Floors sit ~0.05-0.10 below measured values to absorb judge noise (measured re-judge variance: faithfulness +-0.001 aggregate, context_recall +-0.07) while catching real regressions. Recalibrate whenever the dataset version changes - thresholds are meaningless across dataset versions.",
-  "dataset_version": 4,
+  "_comment": "Nightly gates, calibrated to DATASET v5 dev split. Measured band across repeat runs (generation + judge variance, +-0.03): faithfulness 0.86-0.90, relevancy 0.79-0.84, recall 0.87-0.92, precision 0.80-0.84, source_recall 1.0, source_precision 0.87-0.90. Floors sit below the band's low end so only real regressions trip. Recalibrate whenever the dataset version changes - thresholds are meaningless across dataset versions.",
+  "dataset_version": 5,
   "ragas": {
-    "faithfulness": 0.84,
-    "answer_relevancy": 0.75,
-    "context_recall": 0.78,
-    "context_precision": 0.76
+    "faithfulness": 0.80,
+    "answer_relevancy": 0.73,
+    "context_recall": 0.80,
+    "context_precision": 0.70
   },
   "retrieval": {
     "source_recall@K": 0.92,

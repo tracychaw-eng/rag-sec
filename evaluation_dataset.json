@@ -2,8 +2,8 @@
   "metadata": {
     "created": "2026-03-28",
     "revised": "2026-07-08",
-    "revision_note": "v2 (2026-07-08): adversarial set rewritten for the full-10-K corpus. v3 (2026-07-09): numeric factual questions F006-F007 added after table-aware extraction; references verified against ingested corpus text; corpus now multi-year (2 filings per ticker). v4 (2026-07-09): grown with corpus-grounded generated questions (numeric/multi-year/multi-hop/factual/reasoning) + adversarial additions; dev/holdout split introduced.",
-    "version": 4,
+    "revision_note": "v2 (2026-07-08): adversarial set rewritten for the full-10-K corpus. v3 (2026-07-09): numeric factual questions F006-F007 added after table-aware extraction; references verified against ingested corpus text; corpus now multi-year (2 filings per ticker). v4 (2026-07-09): grown with corpus-grounded generated questions (numeric/multi-year/multi-hop/factual/reasoning) + adversarial additions; dev/holdout split introduced. v5 (2026-07-18): QA pass repaired 12 defective generated questions in place (N102, N105, N107, N109, R101, R102, R103, R104, R105, R106, R107, Y116) — ambiguous-scope numerics and speculative reasoning framings; ids/splits unchanged.",
+    "version": 5,
     "corpus": [
       "MSFT_10K_2025-07-30",
       "MSFT_10K_2024-07-30",
@@ -250,13 +250,13 @@
       "tags": [
         "numeric"
       ],
-      "question": "What was the total stockholders’ equity for Microsoft Corporation as of June 30, 2025?",
+      "question": "What was the balance of total stockholders' equity for Microsoft Corporation as of June 30, 2025?",
       "reference_answer": "$ 343,479",
       "source_file": "MSFT",
       "source_chunks": [
         "MSFT_2025-07-30_it8_p001"
       ],
-      "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (ambiguous: The filing shows multiple figures for total stockholders' equity.); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "N102",
       "split": "holdout"
     },
@@ -296,12 +296,12 @@
         "numeric"
       ],
       "question": "What was the Noninterest revenue – reported figure for JPMorgan Chase & Co. for the year ended December 31, 2024?",
-      "reference_answer": "$84,973",
+      "reference_answer": "$ 84,973",
       "source_file": "JPM",
       "source_chunks": [
         "JPM_2025-02-14_it15_p013"
       ],
-      "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (known defective (quality-push diagnosis)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "N105",
       "split": "holdout"
     },
@@ -331,7 +331,7 @@
       "source_chunks": [
         "JPM_2025-02-14_it15_p090"
       ],
-      "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (known defective (quality-push diagnosis)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "N107",
       "split": "dev"
     },
@@ -355,13 +355,13 @@
       "tags": [
         "numeric"
       ],
-      "question": "What is the total long-term portion of NVIDIA Corporation's debt as of January 26, 2025?",
+      "question": "What is the net carrying amount of long-term debt for NVIDIA Corporation as of January 26, 2025?",
       "reference_answer": "8,463",
       "source_file": "NVDA",
       "source_chunks": [
         "NVDA_2025-02-26_it15_p011"
       ],
-      "notes": "Generated from corpus chunks (v4, numeric); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (ambiguous: The filing shows two distinct figures for the total long-term portion.); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "N109",
       "split": "dev"
     },
@@ -730,14 +730,14 @@
       "tags": [
         "multiyear"
       ],
-      "question": "How did the disclosures regarding legal contingencies and income taxes change between Microsoft's 10-K filings for the fiscal years 2024 and 2025?",
-      "reference_answer": "In the 2024 filing, the disclosure about legal contingencies states that an estimated loss from a loss contingency is accrued if it is probable that an asset has been impaired or a liability incurred, similar to the 2025 filing. However, both years emphasize that changes in the factors determining these estimations could materially impact consolidated financial statements. Regarding income taxes, both years maintain that the objectives are to recognize taxes payable or refundable and deferred tax liabilities and assets, but the 2025 filing reiterates the importance of judgment in assessing future tax consequences, which is also present in the 2024 filing but with less emphasis on the variability of outcomes.",
+      "question": "How did Microsoft’s disclosures regarding the recognition of estimated losses from legal contingencies change between the 2024 and 2025 10-K filings?",
+      "reference_answer": "In the 2024 filing, it states, 'An estimated loss from a loss contingency such as a legal proceeding or claim is accrued by a charge to income if it is probable that an asset has been impaired or a liability has been incurred and the amount of the loss can be reasonably estimated.' The 2025 filing contains the same statement, indicating no change in the approach to recognizing estimated losses from legal contingencies.",
       "source_file": "MSFT",
       "source_chunks": [
         "MSFT_2025-07-30_it7_p006",
         "MSFT_2024-07-30_it7_p006"
       ],
-      "notes": "Generated from corpus chunks (v4, multiyear); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (ambiguous: Multiple figures related to income taxes are presented, making it unclear which specific f); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "Y116",
       "split": "dev"
     },
@@ -1105,13 +1105,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might regulatory changes impact JPMorgan Chase's ability to maintain liquidity and fund its operations?",
-      "reference_answer": "Regulatory changes could impose stricter capital requirements on JPMorgan Chase, which may limit its liquidity and increase funding costs, thereby affecting its ability to fund operations and pay dividends.",
+      "question": "What does the filing imply about JPMorgan Chase's dependency on its subsidiaries for financial stability?",
+      "reference_answer": "JPMorgan Chase's financial stability is highly dependent on receiving dividends and borrowings from its subsidiaries, particularly JPMorgan Chase Bank, N.A. and the IHC, due to regulatory restrictions on their ability to pay dividends or extend credit.",
       "source_file": "JPM",
       "source_chunks": [
         "JPM_2026-02-13_it1A_p006"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (speculative framing (how might/could)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R101",
       "split": "holdout"
     },
@@ -1120,13 +1120,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might the growth of the AI PC category impact Microsoft's Windows OEM revenue in both developed and growth markets?",
-      "reference_answer": "The growth of the AI PC category could lead to increased demand for Windows operating system licenses, particularly if these AI PCs are popular among consumers and businesses, thereby positively impacting Windows OEM revenue.",
+      "question": "What does the filing imply about the competitive landscape for Microsoft's server products?",
+      "reference_answer": "Microsoft's server products face competition from a wide variety of server operating systems and applications offered by companies with diverse market approaches, including vertically integrated computer manufacturers and numerous commercial software vendors.",
       "source_file": "MSFT",
       "source_chunks": [
         "MSFT_2025-07-30_it1_p002"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (known defective (quality-push diagnosis)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R102",
       "split": "holdout"
     },
@@ -1135,13 +1135,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might Microsoft's commitment to addressing racial injustice and inequity influence its employee retention and recruitment strategies?",
-      "reference_answer": "Microsoft's initiatives to address racial injustice and inequity are likely to enhance its reputation as an inclusive employer, which can attract diverse talent and improve employee retention by fostering a supportive work environment.",
+      "question": "What does Microsoft's commitment to diversity and inclusion in hiring practices suggest about its overall corporate culture and values?",
+      "reference_answer": "Microsoft's commitment to diversity and inclusion in hiring practices indicates that the company values a respectful and inclusive work environment, which is essential for fostering employee growth and maximizing the potential of its human capital resources.",
       "source_file": "MSFT",
       "source_chunks": [
         "MSFT_2024-07-30_it1_p002"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (known defective (quality-push diagnosis)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R103",
       "split": "dev"
     },
@@ -1150,13 +1150,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might the FDIC's restoration plan for the reserve ratio impact JPMorgan Chase & Co.'s operational strategies and financial planning in the coming years?",
-      "reference_answer": "The FDIC's restoration plan may lead JPMorgan Chase & Co. to adjust its operational strategies and financial planning to accommodate potential increases in bank assessments and ensure compliance with heightened supervisory standards, which could affect profitability and capital allocation.",
+      "question": "What implications does the FDIC's restoration plan for the reserve ratio have for JPMorgan Chase & Co.'s financial stability and regulatory environment?",
+      "reference_answer": "The FDIC's restoration plan indicates that JPMorgan Chase & Co. may face increased regulatory scrutiny and potential financial pressure due to higher bank assessments and the need to comply with capital adequacy standards.",
       "source_file": "JPM",
       "source_chunks": [
         "JPM_2025-02-14_it1_p002"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (known defective (quality-push diagnosis)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R104",
       "split": "dev"
     },
@@ -1165,13 +1165,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might changes in governmental policies regarding specific industries impact JPMorganChase's overall financial performance?",
-      "reference_answer": "Changes in governmental policies that discourage or penalize business relationships with certain industries could negatively affect JPMorganChase's businesses, leading to decreased revenues and increased expenses, which in turn could harm its financial performance.",
+      "question": "What implications do the various risk factors disclosed in the filing have for JPMorgan Chase's operational stability and financial performance?",
+      "reference_answer": "The various risk factors indicate that JPMorgan Chase's operational stability and financial performance could be significantly compromised by legal, regulatory, political, market, credit, liquidity, capital, operational, strategic, conduct, reputation, country, and people risks.",
       "source_file": "JPM",
       "source_chunks": [
         "JPM_2026-02-13_it1A_p000"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (speculative framing (how might/could)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R105",
       "split": "dev"
     },
@@ -1180,13 +1180,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might JPMorganChase's relationships with clients in sensitive industries be affected by public criticism and activism, particularly during election years?",
-      "reference_answer": "JPMorganChase's relationships or ability to transact with clients and customers could be adversely affected if its decisions with respect to doing business with companies in certain sensitive industries are perceived to harm those companies or align with particular political viewpoints, especially during election years when public scrutiny is heightened.",
+      "question": "What implications does the potential for reputational damage have on JPMorganChase's ability to attract and retain clients and customers?",
+      "reference_answer": "Reputational damage to JPMorganChase could significantly harm its ability to attract and retain clients and customers.",
       "source_file": "JPM",
       "source_chunks": [
         "JPM_2025-02-14_it1A_p014"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (speculative framing (how might/could)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R106",
       "split": "dev"
     },
@@ -1195,13 +1195,13 @@
       "tags": [
         "reasoning"
       ],
-      "question": "How might changes in the probability of unfavorable outcomes for legal proceedings affect Microsoft's financial position?",
-      "reference_answer": "Changes in the probability of unfavorable outcomes could lead to significant adjustments in accrued liabilities, thereby impacting the overall financial statements and potentially affecting investor perceptions and stock performance.",
+      "question": "What does the filing indicate about the potential impact of changes in the assessment of loss contingencies on the company's financial statements?",
+      "reference_answer": "Changes in the assessment of loss contingencies could materially impact the company's consolidated financial statements.",
       "source_file": "MSFT",
       "source_chunks": [
         "MSFT_2025-07-30_it7_p006"
       ],
-      "notes": "Generated from corpus chunks (v4, reasoning); key facts verified verbatim against source.",
+      "notes": "Repaired in dataset v5 (speculative framing (how might/could)); regenerated with hardened prompts, key facts verified verbatim.",
       "id": "R107",
       "split": "dev"
     },

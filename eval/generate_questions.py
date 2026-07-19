@@ -48,16 +48,25 @@ PLAN = {
 
 PROMPTS = {
     "numeric": """From this 10-K excerpt, write ONE factual question about a specific
-financial figure that appears in a table row, answerable ONLY from this excerpt.
-The question must name the company and be fully standalone.
-Return JSON: {"question": ..., "reference_answer": "... (must state the exact
-figure)", "key_facts": ["verbatim substrings copied from the excerpt that
-support the answer, including the figure"]}""",
+financial figure that appears in a table row.
+The question must name the company and be fully standalone, and it MUST be
+UNAMBIGUOUS: 10-Ks often show several figures with similar labels (reported
+vs managed basis, carrying value vs contractual amount, consolidated vs
+segment). Include enough scope in the question — the exact row label plus
+the statement, table, or basis it comes from — that exactly ONE figure in
+the entire filing can answer it. If every phrasing would stay ambiguous,
+pick a different figure from the excerpt.
+Return JSON: {"question": ..., "reference_answer": "... (must state the
+exact figure as printed)", "row_label": "the row's label verbatim",
+"key_facts": ["verbatim substrings copied from the excerpt that support
+the answer, including the figure"]}""",
 
     "multiyear": """You get excerpts of the SAME section from TWO different fiscal-year
 10-K filings of the same company. Write ONE question that requires BOTH years —
 e.g. how a figure, risk, or disclosure changed between the two filings.
 Name the company AND both years explicitly so the question is standalone.
+If the question is about a figure, include the exact row label and its
+statement/table/basis so only one figure per filing can answer it.
 Return JSON: {"question": ..., "reference_answer": "... (state what each year's
 filing says)", "key_facts": ["verbatim substrings, at least one from EACH
 year's excerpt"]}""",
@@ -65,6 +74,9 @@ year's excerpt"]}""",
     "multihop": """You get excerpts from TWO different companies' 10-K filings.
 Write ONE comparison question that requires synthesizing BOTH companies'
 disclosures (not answerable from either alone). Name both companies.
+Ask what the filings DISCLOSE or how the disclosures differ — never
+"how might/could X affect Y" (that invites speculation a faithfulness
+rubric will punish).
 Return JSON: {"question": ..., "reference_answer": "... (cover both companies)",
 "key_facts": ["verbatim substrings, at least one from EACH company's excerpt"]}""",
 
@@ -77,9 +89,22 @@ Return JSON: {"question": ..., "reference_answer": ...,
     "reasoning": """From this 10-K excerpt, write ONE question requiring inference —
 the answer is not stated directly but can be derived from what IS stated
 (implications, exposure, second-order effects). Name the company.
+FRAMING RULES (a faithfulness rubric will grade answers strictly against
+the filing text):
+- Ask what the filing's disclosures INDICATE, IMPLY, or REVEAL — never
+  "how might/could/would X affect Y", which invites speculation beyond
+  the filing.
+- The reference_answer must contain ONLY conclusions each key_fact
+  directly supports, stated in indicative mood. No "likely", no predicted
+  outcomes, no mechanisms the excerpt never mentions.
 Return JSON: {"question": ..., "reference_answer": "... (the supported
 inference)", "key_facts": ["verbatim substrings that ground the inference"]}""",
 }
+
+# Question framings that force speculation beyond the filing — a
+# faithfulness rubric can never score them well (even their reference
+# answers speculate). Rejected at validation and flagged by the auditor.
+SPECULATIVE_Q_RE = re.compile(r"(?i)\bhow\s+(might|could|would)\b")
 
 # Hand-curated adversarial additions (absent from any 10-K by construction)
 NEW_ADVERSARIAL = [
@@ -198,6 +223,31 @@ async def _validate(data: dict, chunks: list, qtype: str,
         # tolerate derived deltas/percentages: at most 1 non-source number
         if len(missing) > 1:
             return f"invented figures: {sorted(missing)[:3]}"
+
+    if qtype in ("reasoning", "multihop") and SPECULATIVE_Q_RE.search(
+            data["question"]):
+        return "speculative framing (how might/could)"
+
+    if qtype == "numeric":
+        # Competing-row gate: the row label must resolve to ONE value in
+        # the whole filing, otherwise the question has multiple legitimate
+        # answers and any grader keys on the wrong one half the time.
+        label = (data.get("row_label") or "").strip()
+        if not label:
+            return "no row_label returned"
+        filings = {(c.ticker, c.filing_date) for c in chunks}
+        values = set()
+        for child in retriever.children_by_id.values():
+            if (child.ticker, child.filing_date) not in filings:
+                continue
+            for ln in child.text.splitlines():
+                if label.casefold() in ln.casefold() and ln.lstrip().startswith("|"):
+                    nums = _NUM_RE.findall(ln)
+                    if nums:
+                        values.add(nums[0].replace(",", ""))
+        if len(values) > 1:
+            return (f"ambiguous row label {label!r}: "
+                    f"{len(values)} competing values in the filing")
 
     expected_tickers = {c.ticker for c in chunks}
     hits = await retriever.retrieve_children([data["question"]])
