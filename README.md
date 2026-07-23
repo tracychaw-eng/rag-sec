@@ -69,6 +69,10 @@ source-diversity guarantee for comparisons; reranker score floors need a
 `min_keep` guard. Full history and rationale: `docs/phase1.md` →
 `docs/phase3.md`.
 
+**Detailed flowcharts + workflow-pattern analysis** (routing +
+parallelization inside a sequential, gate-checked pipeline; async
+evaluator; deliberately not an agent): [docs/architecture.md](docs/architecture.md).
+
 ## Quickstart
 
 Prereqs: Python 3.12+, Docker, `OPENAI_API_KEY`, `COHERE_API_KEY` in env.
