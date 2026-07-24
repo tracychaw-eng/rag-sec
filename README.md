@@ -72,6 +72,8 @@ source-diversity guarantee for comparisons; reranker score floors need a
 **Detailed flowcharts + workflow-pattern analysis** (routing +
 parallelization inside a sequential, gate-checked pipeline; async
 evaluator; deliberately not an agent): [docs/architecture.md](docs/architecture.md).
+**Memory design** (corpus knowledge vs per-user memory, the pollution
+rule, governance, honest gaps): [docs/memory.md](docs/memory.md).
 
 ## Quickstart
 
